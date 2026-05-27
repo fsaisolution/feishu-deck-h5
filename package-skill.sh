@@ -95,9 +95,10 @@ a writable mounted folder.
 - \`runs/\` (per-invocation outputs) is intentionally excluded from this
   zip. It will be created at \`~/.claude/skills/$SKILL_NAME/runs/\` (or
   at the repo root when checked out via git) on first use.
-- The skill is fully self-contained — no \`pip install\` or
-  \`npm install\` required. Stock Python 3.11+ and a modern browser
-  are enough.
+- Core deck generation is self-contained: no \`pip install\` or
+  \`npm install\` is required beyond stock Python 3.11+ and a modern
+  browser. Developer checks, \`--gate ingest\`, and strict visual audits
+  need the optional dependencies in \`requirements-dev.txt\`.
 EOF
 
 # Build the zip

@@ -870,6 +870,7 @@ body {
 }
 .slide[data-layout="quote"] blockquote {
   font: 600 92px/1.2 var(--fs-font-cjk); color: #fff; max-width: 1500px;
+  text-wrap: balance;
 }
 .slide[data-layout="quote"] .attrib {
   font: 500 30px/1.4 var(--fs-font-cjk); color: var(--fs-text-48);
@@ -1112,7 +1113,7 @@ body {
    wrap it as an opt-in: data-variant="with-header". */
 .slide[data-layout="agenda"]:not([data-variant="with-header"]) .header { display: none; }
 .slide[data-layout="agenda"][data-variant="with-header"] .header {
-  position: absolute; top: 96px; left: 96px; right: 96px;
+  position: absolute; top: 61px; left: 73px; right: 320px;
 }
 .slide[data-layout="agenda"][data-variant="with-header"] .header h2 {
   font: 700 48px/1.05 var(--fs-font-cjk); letter-spacing: -0.005em;

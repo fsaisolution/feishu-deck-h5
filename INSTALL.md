@@ -9,7 +9,7 @@
 
 Tell your Claude agent:
 
-> "帮我安装 feishu-deck-h5 这个 skill：`git@github.com:FuQiang/feishu-deck-h5.git`"
+> "帮我安装 feishu-deck-h5 这个 skill：`https://github.com/fuqiang/feishu-deck-h5.git`"
 
 The agent will detect your harness, pick the right install path, and verify.
 
@@ -26,7 +26,7 @@ Run these checks **in order**, stop at the first match:
 **Action — instruct the user to run:**
 
 ```
-/plugin marketplace add git@github.com:FuQiang/feishu-deck-h5.git
+/plugin marketplace add https://github.com/fuqiang/feishu-deck-h5.git
 /plugin install feishu-deck-h5@feishu-deck-h5
 ```
 
@@ -41,7 +41,7 @@ Then restart the session. (Slash commands cannot be invoked by an agent — the 
 **Action — run as the user:**
 
 ```bash
-git clone git@github.com:FuQiang/feishu-deck-h5.git /tmp/feishu-deck-h5-installer
+git clone https://github.com/fuqiang/feishu-deck-h5.git /tmp/feishu-deck-h5-installer
 bash /tmp/feishu-deck-h5-installer/install.sh
 rm -rf /tmp/feishu-deck-h5-installer
 ```
@@ -57,7 +57,7 @@ CLAUDE_DIR=~/.openclaw bash install.sh
 ### 3. Manual path (fallback when nothing else fits)
 
 ```bash
-git clone git@github.com:FuQiang/feishu-deck-h5.git ~/Projects/feishu-deck-h5
+git clone https://github.com/fuqiang/feishu-deck-h5.git ~/Projects/feishu-deck-h5
 mkdir -p ~/.claude/skills
 ln -s ~/Projects/feishu-deck-h5/skills/feishu-deck-h5 ~/.claude/skills/feishu-deck-h5
 bash ~/.claude/skills/feishu-deck-h5/assets/preflight.sh
@@ -67,18 +67,19 @@ bash ~/.claude/skills/feishu-deck-h5/assets/preflight.sh
 
 ## Prerequisites (verify before installing)
 
-- SSH key registered with GitHub: `ssh -T git@github.com` returns `Hi <user>!`
-- Collaborator access on `FuQiang/feishu-deck-h5` (repo is private — ask FuQiang)
-- `python3`, `bash`, `node` on PATH (used by build/validate)
+- `python3` 3.11+, `bash`, `node` on PATH (used by build/validate)
+- For strict visual CI or local visual audits: `pip install -r skills/feishu-deck-h5/requirements-dev.txt` and `python -m playwright install chromium`
+- SSH access is only required when `REPO_URL` uses `git@github.com:...`.
 
-If `ssh -T git@github.com` fails, stop and ask the user to set up their SSH key first — every install path depends on it.
+If the HTTPS clone fails, treat it as a network or repository-access problem.
+If an SSH clone fails, ask the user to set up their SSH key first.
 
 ### Don't have collaborator access yet?
 
 If `git ls-remote git@github.com:FuQiang/feishu-deck-h5.git HEAD` fails with
 "Repository not found" or "Permission denied" but `ssh -T git@github.com`
-works, the user has SSH set up but is not yet a collaborator on this private
-repo.
+works, the user has SSH set up but is not yet a collaborator on the SSH-only
+remote they are trying to use.
 
 `install.sh` detects this and exits with **code 2**, printing a copy-pasteable
 Lark/Feishu message template (with the user's GitHub username pre-filled) for

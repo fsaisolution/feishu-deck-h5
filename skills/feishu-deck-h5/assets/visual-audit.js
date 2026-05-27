@@ -432,7 +432,7 @@
     const CONTENT_CHROME_CLASSES = [
       'pageno', 'footnote', 'source', 'attrib', 'copyright', 'wordmark',
       'contact', 'eyebrow', 'pill', 'tag', 'chip', 'badge', 'demo-tag',
-      'demo-label', 'caption-meta', 'cite',
+      'demo-label', 'caption-meta', 'cite', 'title-en',
     ];
     const MOCK_CONTAINERS = [
       'ui-window', 'ui-screen', 'ui-chat', 'ui-body', 'ui-toolbar',

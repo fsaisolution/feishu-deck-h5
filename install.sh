@@ -14,11 +14,11 @@
 # Environment variables:
 #   INSTALL_DIR   where to keep the working clone (default: ~/Projects/feishu-deck-h5)
 #   CLAUDE_DIR    skill registration root (default: ~/.claude — use ~/.openclaw etc. for other harnesses)
-#   REPO_URL      override the git remote (default: git@github.com:FuQiang/feishu-deck-h5.git)
+#   REPO_URL      override the git remote (default: https://github.com/fuqiang/feishu-deck-h5.git)
 
 set -e
 
-REPO_URL="${REPO_URL:-git@github.com:FuQiang/feishu-deck-h5.git}"
+REPO_URL="${REPO_URL:-https://github.com/fuqiang/feishu-deck-h5.git}"
 INSTALL_DIR="${INSTALL_DIR:-$HOME/Projects/feishu-deck-h5}"
 CLAUDE_DIR="${CLAUDE_DIR:-$HOME/.claude}"
 SKILLS_DIR="$CLAUDE_DIR/skills"
@@ -30,22 +30,28 @@ echo "    target:  $INSTALL_DIR"
 echo "    symlink: $LINK_PATH"
 echo
 
-# Prereq 1: SSH access to GitHub
-SSH_OUT="$(ssh -T -o BatchMode=yes -o ConnectTimeout=5 git@github.com 2>&1 || true)"
-if ! echo "$SSH_OUT" | grep -q "successfully authenticated\|Hi "; then
-  echo "ERROR — SSH to github.com failed. Make sure your SSH key is registered:"
-  echo "  https://github.com/settings/keys"
-  echo "  Test with: ssh -T git@github.com"
-  exit 1
-fi
-GH_USER="$(echo "$SSH_OUT" | sed -n 's/^Hi \([^!]*\)!.*/\1/p')"
+# Prereq: verify remote access. SSH remotes get an SSH-key hint; HTTPS remotes
+# do not require GitHub SSH setup.
+GH_USER=""
+case "$REPO_URL" in
+  git@github.com:*|ssh://git@github.com/*)
+    SSH_OUT="$(ssh -T -o BatchMode=yes -o ConnectTimeout=5 git@github.com 2>&1 || true)"
+    if ! echo "$SSH_OUT" | grep -q "successfully authenticated\|Hi "; then
+      echo "ERROR — SSH to github.com failed. Make sure your SSH key is registered:"
+      echo "  https://github.com/settings/keys"
+      echo "  Test with: ssh -T git@github.com"
+      exit 1
+    fi
+    GH_USER="$(echo "$SSH_OUT" | sed -n 's/^Hi \([^!]*\)!.*/\1/p')"
+    ;;
+esac
 
-# Prereq 2: access to this specific repo (collaborator on private repo)
 if ! git ls-remote "$REPO_URL" HEAD >/dev/null 2>&1; then
-  cat <<EOF
+  if [ -n "$GH_USER" ]; then
+    cat <<EOF
 
-ERROR — your SSH key works, but you don't have access to FuQiang/feishu-deck-h5
-(it's a private repo). Send this message to FuQiang on Lark/Feishu:
+ERROR — your SSH key works, but you don't have access to this SSH remote.
+Send this message to the repo owner on Lark/Feishu:
 
   ──────────────────────────────────────────────────────────────
   你好 FuQiang，想用一下 feishu-deck-h5 这个 skill，
@@ -60,6 +66,17 @@ ERROR — your SSH key works, but you don't have access to FuQiang/feishu-deck-h
 收到 GitHub 邀请邮件后点 "Accept invitation"，然后重新运行本脚本。
 
 EOF
+  else
+    cat <<EOF
+
+ERROR — cannot access $REPO_URL.
+
+If this is a public repo, check your network and the URL.
+If this is a private fork, authenticate with GitHub or set REPO_URL to a
+remote you can read.
+
+EOF
+  fi
   exit 2
 fi
 

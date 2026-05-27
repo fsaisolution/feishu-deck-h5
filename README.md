@@ -4,7 +4,7 @@
 > 浏览器全屏即放映、单文件发 IM、文本编辑器改字、视觉与飞书官方母版逐像素对齐。
 > 而且:**版面质量不是"靠人盯",是一层无头浏览器逐页渲染、程序化卡死的硬门禁。**
 
-🔗 看样品 → [`examples/sample-deck.html`](examples/sample-deck.html)
+🔗 看样品 → [`skills/feishu-deck-h5/examples/sample-deck.html`](skills/feishu-deck-h5/examples/sample-deck.html)
 （双击在浏览器打开,左右键翻页）
 
 ---
@@ -127,9 +127,9 @@ python3 deck-json/render-deck.py runs/<ts>/output/deck.json runs/<ts>/output/ --
 
 ## 看更多例子
 
-- [`examples/sample-deck.html`](examples/sample-deck.html) —— 12 张 slide 涵盖全部基础 layout
-- [`preview-dark.html`](preview-dark.html) —— 设计令牌(颜色 / 字号 / 渐变)+ 组件 gallery
-- [`templates/slide-recipes.html`](templates/slide-recipes.html) —— 每种 layout 的 reference 实现
+- [`skills/feishu-deck-h5/examples/sample-deck.html`](skills/feishu-deck-h5/examples/sample-deck.html) — 12 张 slide 涵盖全部 13 种 layout
+- [`skills/feishu-deck-h5/preview-dark.html`](skills/feishu-deck-h5/preview-dark.html) — 设计令牌（颜色 / 字号 / 渐变）+ 组件 gallery
+- [`skills/feishu-deck-h5/templates/slide-recipes.html`](skills/feishu-deck-h5/templates/slide-recipes.html) — 每种 layout 的 reference 实现
 
 ---
 

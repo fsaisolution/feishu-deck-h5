@@ -685,7 +685,7 @@
     const CONTENT_CHROME_CLASSES = [
       'pageno', 'footnote', 'source', 'attrib', 'copyright', 'wordmark',
       'contact', 'eyebrow', 'pill', 'tag', 'chip', 'badge', 'demo-tag',
-      'demo-label', 'caption-meta', 'cite',
+      'demo-label', 'caption-meta', 'cite', 'title-en',
     ];
     // F-13: single source — the body-floor mock set IS the tier mock set (the
     // TIER_MOCK comment says "Shared with R-VIS-BODY-FLOOR below"). They had

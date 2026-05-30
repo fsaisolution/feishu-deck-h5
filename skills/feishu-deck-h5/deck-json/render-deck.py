@@ -770,10 +770,16 @@ def _enrich_end(ctx, slide):
     ctx["contact_html"] = _optional_text_node(
         ctx.get("contact"), snp, "contact",
         tag="div", classes="contact", indent="        ")
-    # Optional slogan — mirrors PPT '封底(带 slogan)' layout master.
+    # Optional custom slogan replaces the graphical default, instead of stacking with it.
+    slogan = ctx.get("slogan")
     ctx["slogan_html"] = _optional_text_node(
-        ctx.get("slogan"), snp, "slogan",
+        slogan, snp, "slogan",
         tag="div", classes="slogan", indent="        ")
+    ctx["default_slogan_html"] = (
+        ""
+        if slogan
+        else '        <div class="slogan slogan-default" role="img" aria-label="先进团队 先用飞书"></div>'
+    )
 
 
 def _enrich_section(ctx, slide):
@@ -784,7 +790,7 @@ def _enrich_section(ctx, slide):
         ctx.get("parent_label"), snp, "parent_label",
         tag="div", classes="parent-label", indent="        ")
     ctx["lede_html"] = _optional_text_node(
-        ctx.get("lede"), snp, "lede", classes="lede", indent="        ")
+        ctx.get("lede"), snp, "lede", classes="lede", indent="          ")
 
     pills = ctx.get("pills") or []
     if pills:

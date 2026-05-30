@@ -79,7 +79,7 @@ python3 render-deck.py runs/<ts>/output/deck.json runs/<ts>/output/
 | `flow` | `timeline` / `process` / `tree` / **`swim`** | 时间轴 / 步骤 / MECE 拆解树 / 多泳道 roadmap |
 | **`logo-wall`** | — | N 行业 × M 客户 logo 矩阵 |
 | **`arch-stack`** | — | 4 层架构图(应用/平台/AI/数据底座) |
-| `end` | — | 结束页(可选 `slogan` 字段) |
+| `end` | — | 结束页(可选 `slogan` 字段,传入时替换默认口号图) |
 | **specials** | | |
 | `replica` | — | 全屏 PDF 页图 |
 | `raw` | — | 单页 HTML 自由发挥(escape hatch) |

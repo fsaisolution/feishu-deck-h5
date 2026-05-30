@@ -943,7 +943,7 @@
 
 
 /* ===== end with-slogan · custom text slogan ===== */
-/* When the deck author provides slogan text, hide the graphical default. */
+/* Defensive fallback for raw/static end slides: custom slogan wins over the default image. */
 .slide[data-layout="end"]:has(.slogan:not(.slogan-default)) .slogan-default {
   display: none;
 }

@@ -677,8 +677,11 @@ body {
 .slide[data-layout="section"] {
   background: #000 var(--fs-asset-section-bg) center/cover no-repeat;
 }
+.slide[data-layout="section"] .section-copy {
+  position: absolute; top: 271px; left: 126px; right: 124px;
+  display: flex; flex-direction: column; align-items: flex-start;
+}
 .slide[data-layout="section"] .chapter-num {
-  position: absolute; top: 271px; left: 126px;
   /* line-height 1.0 (was 0.9) + padding-top prevents the gradient-clipped glyph from
      being cut off at the line-box top edge in WebKit when -webkit-background-clip:text */
   font: 700 160px/1 var(--fs-font-latin);
@@ -689,17 +692,17 @@ body {
   -webkit-text-fill-color: transparent; color: transparent;
 }
 .slide[data-layout="section"] h2.title {
-  position: absolute; top: 447px; left: 126px;
   font: 700 88px/1.18 var(--fs-font-cjk);
   letter-spacing: -0.005em; color: #fff;
+  margin: 8px 0 0;
   max-width: 1300px;
 }
 .slide[data-layout="section"] .lede {
   /* allow:white-opacity — section .lede is master-spec subtitle; 0.72 keeps
      it visually subordinate to the 88px chapter title above. */
-  position: absolute; top: 597px; left: 126px;
   font: 500 36px/1.45 var(--fs-font-cjk);
   color: rgba(255,255,255,0.72);
+  margin-top: 34px;
   max-width: 1100px;
 }
 .slide[data-layout="section"] .pills {
@@ -1927,6 +1930,9 @@ body {
 }
 
 /* Verdict pill matrix (pattern B) — Go / Conditional / No-Go cards */
+.slide .verdict-grid {
+  display: grid;
+}
 .slide .verdict-card {
   position: relative; overflow: hidden; border-radius: var(--fs-radius-card);
   border: 2px solid var(--fs-text-16);

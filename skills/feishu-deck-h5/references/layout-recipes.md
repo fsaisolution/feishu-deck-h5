@@ -103,9 +103,11 @@ Chapter divider. Big numeral with a period (`02.` not `02`), section title below
 ```html
 <div class="slide" data-layout="section" data-screen-label="03 Section">
   <div class="wordmark">飞书</div>
-  <div class="chapter-num">02.</div>
-  <h2 class="title title-zh">先进团队的工作方式</h2>
-  <p class="lede">即时同步 · 共识对齐 · 闭环交付</p>
+  <div class="section-copy">
+    <div class="chapter-num">02.</div>
+    <h2 class="title title-zh">先进团队的工作方式</h2>
+    <p class="lede">即时同步 · 共识对齐 · 闭环交付</p>
+  </div>
   <div class="pills">
     <span class="pill">飞书消息</span>
     <span class="pill">飞书文档</span>
@@ -118,9 +120,10 @@ Chapter divider. Big numeral with a period (`02.` not `02`), section title below
 
 Master pixel grid (1920×1080):
 - Logo: top-right at `1677, 61` (mono-white)
-- `.chapter-num`: `126, 271`, font **160/700** (master is 80 pt = 160 px on 1920 canvas)
-- `.title`: `126, 447`, font **88/700**
-- `.lede`: `126, 597`, font 36/500
+- `.section-copy`: starts at `126, 271`; keeps chapter number, title, and lede in flow so a wrapped title pushes the lede down instead of overlapping it.
+- `.chapter-num`: font **160/700** (master is 80 pt = 160 px on 1920 canvas)
+- `.title`: font **88/700**
+- `.lede`: font 36/500
 - `.pills`: `126, bottom 96` row of ghost pills
 - Background: `lark-section-bg.jpg` (cool blue glow on the right edge)
 
@@ -760,4 +763,3 @@ If you write a custom layout, follow these patterns. If a slide overflows in
 practice, run through this list before tweaking pixel values.
 
 ---
-

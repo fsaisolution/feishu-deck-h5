@@ -14,7 +14,7 @@ right delivery mode and call it out explicitly when handing off.
 by file path.**
 
 - **Interactive / chat / dialog** (the user sent a message and is
-  waiting for your reply — Claude Code, Lark bot, web chat, any
+  waiting for your reply — Claude Code, Codex, Lark bot, web chat, any
   agent platform with a conversation UI): **MUST** end the reply by
   pointing at — or attaching — the new artifact under
   `runs/<ts>/output/`. Every iteration. "已修复" alone is a bug; the
@@ -41,7 +41,7 @@ verify the artifact form. Pick exactly **one** of three valid shapes:
 | Shape | When | What goes back |
 |---|---|---|
 | **A · inline single-file HTML** *(default for "show me / 给客户看 / IM 转发 / 链接预览")* | The user just wants to OPEN and SEE the deck. 90% of cases. | `bash build.sh --inline` → ship `examples/sample-deck-inline.html` (or its renamed copy under `runs/<ts>/output/`). Single self-contained file, base64-inlined CSS/JS/images, ~360 KB. Double-click anywhere, works offline. |
-| **B · zipped output folder** *(when the user needs to edit text)* | The user (or their downstream customer / sales / 大客户经理) needs to change copy without Claude in the loop. | `bash assets/package-deliverable.sh runs/<ts>/output/` → ship the resulting `deck-editable.zip`. Includes `index.html` + assets + `texts.md` + optional `deck.json` + `assets-manifest.yaml` + `apply-texts.py` + `apply.command`/`apply.bat` launchers. Recipient unzips, edits `texts.md`, double-clicks the launcher to regenerate. |
+| **B · zipped output folder** *(when the user needs to edit text)* | The user (or their downstream customer / sales / 大客户经理) needs to change copy without the agent in the loop. | `bash assets/package-deliverable.sh runs/<ts>/output/` → ship the resulting `deck-editable.zip`. Includes `index.html` + assets + `texts.md` + optional `deck.json` + `assets-manifest.yaml` + `apply-texts.py` + `apply.command`/`apply.bat` launchers. Recipient unzips, edits `texts.md`, double-clicks the launcher to regenerate. |
 | **C · hosted URL** *(when the user already deploys to Pages / a CDN)* | Deck lives at a stable web URL. | Ship the URL string. No file attachment. |
 
 **Banned form · single linked HTML**: never hand back just one
@@ -217,7 +217,7 @@ alongside `index.html` automatically. Pass it whenever you're
 delivering — the working `index.html` stays in place for further
 edits, and the named copy goes out to the recipient.
 
-### Mode 1 · Claude Code on the user's local machine
+### Mode 1 · Claude Code / Codex on the user's local machine
 
 Default. The user has filesystem access to `runs/<timestamp>/output/`
 already. Just tell them the path:
@@ -264,7 +264,7 @@ Hand the zip to the harness for delivery. Typical bot flows:
   handles uploading or attaching it to the response.
 - **Slack / email / etc.**: same — attach the zip.
 
-The user does not need Claude Code, OpenClaw, or pip. Only stock
+The user does not need the original authoring agent, OpenClaw, or pip. Only stock
 `python3` (default on macOS, one-time install on Windows).
 
 ### Mode 3 · View-only delivery (when editability isn't needed)
@@ -301,4 +301,3 @@ copy tweaks; shipping the edit kit pre-empts a round-trip back to you.
 >    flagged with 〔TODO〕 and must be replaced before external use."
 
 ---
-

@@ -194,7 +194,18 @@ body {
 .deck[data-mode="present"] .slide-frame:has(> .slide[data-layout="table"]),
 .deck[data-mode="present"] .slide-frame:has(> .slide[data-layout="timeline"]),
 .deck[data-mode="present"] .slide-frame:has(> .slide[data-layout="process"]),
-.deck[data-mode="present"] .slide-frame:has(> .slide[data-layout="image-text"]) {
+.deck[data-mode="present"] .slide-frame:has(> .slide[data-layout="image-text"]),
+/* 2026-05-28 · raw + iframe-embed default to content-bg letterbox fill.
+   Without these in the whitelist, the slide-frame keeps the deck-level
+   radial gradient in the letterbox area while .slide itself paints
+   content-bg — luma jump at the slide top edge reads as "标题上方有黑条"
+   on non-16:9 viewports. Most raw slides are content-page-ish; raw
+   slides emulating cover / end / replica can override per-slide.
+   Phase 1.c extras (matrix-2x2 / issue-tree / flow-swim / waterfall /
+   arch-stack / logo-wall / content-before-after) are handled in
+   extra-layouts.css, not duplicated here. */
+.deck[data-mode="present"] .slide-frame:has(> .slide[data-layout="raw"]),
+.deck[data-mode="present"] .slide-frame:has(> .slide[data-layout="iframe-embed"]) {
   background: #000 var(--fs-asset-content-bg) center/cover no-repeat;
 }
 .deck[data-mode="present"] .slide-frame.is-current {
@@ -233,13 +244,21 @@ body {
   border: 1px solid var(--fs-hairline);
   border-radius: 6px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+  /* 2026-05-29 · F-27 perf: skip painting off-screen frames in scroll/browse
+     mode too (present mode already does this at line ~157). No
+     contain-intrinsic-size needed — the base .slide-frame keeps
+     `aspect-ratio:16/9 + width:100% + contain:size`, so each frame's box is
+     sized by layout (not content), reserving correct height with zero
+     scroll-anchor jank. Saves a full 1920×1080 paint per off-screen slide on
+     long decks (esp. mobile browse). */
+  content-visibility: auto;
 }
 
 /* ---- Deck UI overlay (progress bar, mode toggle, bottom controls) ---- */
 .deck-ui {
   position: fixed; z-index: 50; pointer-events: none;
   font-family: var(--fs-font-latin); color: var(--fs-text-48);
-  font-size: 16px; letter-spacing: 0.08em;
+  font-size: var(--fs-foot); letter-spacing: 0.08em;
 }
 
 /* Top progress bar — present-mode only, brand keyline gradient */
@@ -289,7 +308,7 @@ body {
 .deck-ui .deck-controls .indicator {
   display: inline-flex; align-items: baseline;
   min-width: 64px; justify-content: center;
-  font: 600 16px/1 var(--fs-font-latin); letter-spacing: 0.10em;
+  font: 600 var(--fs-foot)/1 var(--fs-font-latin); letter-spacing: 0.10em;
   color: #fff;
 }
 .deck-ui .deck-controls .indicator .sep { color: var(--fs-text-40); margin: 0 2px; }
@@ -299,7 +318,7 @@ body {
 /* Tiny corner hint — present mode only */
 .deck-ui .nav-hint {
   position: fixed; left: 24px; bottom: 32px; pointer-events: none;
-  color: var(--fs-text-40); font: 500 16px/1 var(--fs-font-latin);
+  color: var(--fs-text-40); font: 500 var(--fs-foot)/1 var(--fs-font-latin);
   letter-spacing: 0.10em;
 }
 
@@ -377,7 +396,7 @@ body {
 
 /* Eyebrow (uppercase Latin, accent color, tracked) */
 .slide .eyebrow {
-  font: 600 16px/1 var(--fs-font-latin);
+  font: 600 var(--fs-foot)/1 var(--fs-font-latin);
   letter-spacing: 0.18em; text-transform: uppercase;
   color: var(--fs-accent);
 }
@@ -391,21 +410,21 @@ body {
 
 /* Reusable bilingual title block */
 .slide .title-zh {
-  font: 600 48px/1.15 var(--fs-font-cjk);
+  font: 600 var(--fs-title)/1.15 var(--fs-font-cjk);
   letter-spacing: -0.005em; color: #fff;
 }
 .slide .title-en {
   margin-top: 14px;
-  font: 500 24px/1.4 var(--fs-font-latin);
+  font: 500 var(--fs-body)/1.4 var(--fs-font-latin);
   color: var(--fs-text-48); letter-spacing: 0.02em;
 }
 
 /* Body text */
 .slide .body {
-  font: 500 28px/1.5 var(--fs-font-cjk); color: var(--fs-text-72);
+  font: 500 var(--fs-sub)/1.5 var(--fs-font-cjk); color: var(--fs-text-72);
 }
 .slide .lede {
-  font: 500 28px/1.4 var(--fs-font-cjk); color: var(--fs-text-72);
+  font: 500 var(--fs-sub)/1.4 var(--fs-font-cjk); color: var(--fs-text-72);
 }
 .slide .caption {
   /* Body content per SKILL.md "Typography floor — content body & captions
@@ -413,7 +432,7 @@ body {
      value was below the documented body floor and read as illegible
      fine print on projector. For chrome-style citations (e.g. footnote
      under a stats table) use `.footnote` (14 px chrome) instead. */
-  font: 500 24px/1.4 var(--fs-font-latin);
+  font: 500 var(--fs-body)/1.4 var(--fs-font-latin);
   color: var(--fs-text-48); letter-spacing: 0.06em;
 }
 
@@ -444,7 +463,7 @@ body {
   border: 1px solid var(--fs-text-16);
   border-radius: var(--fs-radius-pill);
   padding: 10px 18px;
-  font: 500 16px/1 var(--fs-font-cjk);
+  font: 500 var(--fs-foot)/1 var(--fs-font-cjk);
   color: var(--fs-text-72);
   background: rgba(255,255,255,0.02);
 }
@@ -595,11 +614,11 @@ body {
    which read as visibly smaller than neighboring slides. content-3up's
    tighter overrides at lines 514-518 still apply where present. */
 .slide .ctitle {
-  font: 600 28px/1.3 var(--fs-font-cjk);
+  font: 600 var(--fs-sub)/1.3 var(--fs-font-cjk);
   color: var(--fs-text); margin: 0;
 }
 .slide .cbody {
-  font: 500 24px/1.6 var(--fs-font-cjk);
+  font: 500 var(--fs-body)/1.6 var(--fs-font-cjk);
   color: var(--fs-text-72); margin: 0;
 }
 
@@ -701,7 +720,7 @@ body {
    同一页内 content label(产品名)必须 ≥ 24 Body,不能 16 chrome,否则在投影
    距离上看不清。 */
 .slide[data-layout="section"] .pills .pill {
-  font-size: 24px;
+  font-size: var(--fs-body);
   padding: 12px 22px;
 }
 
@@ -724,7 +743,7 @@ body {
    52 px rule below now applies to ALL content layouts.
    See feishu-deck.css line ~922 .slide .header .title-zh */
 .slide[data-layout="content-3up"] .header .pageno {
-  font: 500 16px/1 var(--fs-font-latin);
+  font: 500 var(--fs-foot)/1 var(--fs-font-latin);
   color: var(--fs-text-48); letter-spacing: 0.18em;
 }
 .slide[data-layout="content-3up"] .grid {
@@ -746,19 +765,29 @@ body {
   /* 2026-05-17: 28 → 48 — when a hero numeral is the visual anchor, the
      accompanying title must hold its own at Title tier; 28 reads as sub
      and the title looked weak against the 88 num. */
-  font: 700 48px/1.15 var(--fs-font-cjk); color: #fff;
+  font: 700 var(--fs-title)/1.15 var(--fs-font-cjk); color: #fff;
 }
 .slide[data-layout="content-3up"] .card .cbody {
   /* 2026-05-16: 20 → 22 — body content per SKILL.md typography floor. */
-  font: 500 24px/1.55 var(--fs-font-cjk); color: var(--fs-text-65); flex: 1;
+  font: 500 var(--fs-body)/1.55 var(--fs-font-cjk); color: var(--fs-text-65); flex: 1;
 }
 .slide[data-layout="content-3up"] .card .cfoot {
   display: flex; align-items: center; justify-content: space-between;
   border-top: 1px solid var(--fs-hairline); padding-top: 16px;
-  font: 500 16px/1 var(--fs-font-latin); letter-spacing: 0.14em;
+  font: 500 var(--fs-foot)/1 var(--fs-font-latin); letter-spacing: 0.14em;
   text-transform: uppercase; color: var(--fs-text-48);
 }
 .slide[data-layout="content-3up"] .card .cfoot svg { color: var(--fs-accent); }
+/* 规范 L3 落地(2026-05-30):content-3up 卡片按内容尺寸 + 共享中线 + 卡内垂直
+   居中,取代全局 `.slide .grid .card { align-self: stretch }` 的强制等高。等高会把
+   内容最多的那张卡片文字挤到底边(实测下内距 −27px 溢出,两侧却空 113px)。改后:
+   稀疏卡片居中、留白均衡;最满的卡片长高吃下内容,不再贴底。只覆盖 content-3up,
+   不动 1712 行的全局 legacy stretch(其它版式仍依赖它)。
+   验证:assets/check-distribution.py 在青啤 slide 3 上 3 findings → 0,全 deck 零回归。 */
+.slide[data-layout="content-3up"] .grid .card {
+  align-self: center;
+  justify-content: center;
+}
 
 /* ============================================================================
    LAYOUT 04 — Content 2-column (text + visual)
@@ -789,7 +818,7 @@ body {
   /* 2026-05-17: text-72 → #fff. feature-list items ARE body content;
      muted color was readability gap on projector. */
   position: relative; padding-left: 28px;
-  font: 500 24px/1.45 var(--fs-font-cjk); color: #fff;
+  font: 500 var(--fs-body)/1.45 var(--fs-font-cjk); color: #fff;
   list-style: none;
 }
 .slide ul.feature-list li::before {
@@ -829,7 +858,7 @@ body {
   width: 24px; height: 24px; flex: 0 0 24px;
   border-radius: 50%;
   display: grid; place-items: center;
-  font: 700 16px/1 var(--fs-font-latin);
+  font: 700 var(--fs-foot)/1 var(--fs-font-latin);
   background: rgba(51, 214, 192, 0.20);
   color: var(--fs-teal);
 }
@@ -838,11 +867,11 @@ body {
   min-width: 0;
 }
 .slide .fs-claim-row__label {
-  font: 700 24px/1.3 var(--fs-font-cjk); color: #fff;
+  font: 700 var(--fs-body)/1.3 var(--fs-font-cjk); color: #fff;
   letter-spacing: -0.005em;
 }
 .slide .fs-claim-row__desc {
-  font: 500 24px/1.4 var(--fs-font-cjk); color: #cdd0df;
+  font: 500 var(--fs-body)/1.4 var(--fs-font-cjk); color: #cdd0df;
 }
 /* Accent variants */
 .slide .fs-claim-row.is-blue   { border-color: rgba(60,127,255,0.40); background: rgba(60,127,255,0.05); }
@@ -879,6 +908,7 @@ body {
 }
 .slide[data-layout="quote"] blockquote {
   font: 600 92px/1.2 var(--fs-font-cjk); color: #fff; max-width: 1500px;
+  text-wrap: balance;
 }
 .slide[data-layout="quote"] .attrib {
   font: 500 30px/1.4 var(--fs-font-cjk); color: var(--fs-text-48);
@@ -912,7 +942,7 @@ body {
    without competing with the 132 number. */
 .slide[data-layout="stats"] .col .trend {
   display: inline-flex; align-items: center; gap: 8px;
-  font: 600 28px/1 var(--fs-font-cjk); letter-spacing: 0.04em;
+  font: 600 var(--fs-sub)/1 var(--fs-font-cjk); letter-spacing: 0.04em;
   text-transform: none; color: var(--fs-accent);
 }
 .slide[data-layout="stats"] .col .num {
@@ -920,10 +950,10 @@ body {
   color: #fff;
 }
 .slide[data-layout="stats"] .col .num .unit {
-  font-size: 48px; color: var(--fs-text-72); margin-left: 8px; font-weight: 600;
+  font-size: var(--fs-title); color: var(--fs-text-72); margin-left: 8px; font-weight: 600;
 }
 .slide[data-layout="stats"] .col .label {
-  font: 500 24px/1.4 var(--fs-font-cjk); color: var(--fs-text-72);
+  font: 500 var(--fs-body)/1.4 var(--fs-font-cjk); color: var(--fs-text-72);
 }
 /* 2026-05-20 · font family switched latin → cjk on .source / .footnote.
    When source text mixes Latin and CJK ("Source · 内部传输实测 2024 Q4"),
@@ -931,12 +961,12 @@ body {
    renders smaller / mismatched. CJK-first font handles both scripts more
    uniformly at 16px. */
 .slide[data-layout="stats"] .col .source {
-  font: 500 16px/1.4 var(--fs-font-cjk); color: var(--fs-text-40);
+  font: 500 var(--fs-foot)/1.4 var(--fs-font-cjk); color: var(--fs-text-40);
   letter-spacing: 0.06em;
 }
 .slide[data-layout="stats"] .footnote {
   position: absolute; left: 96px; right: 96px; bottom: 110px;
-  font: 500 16px/1.4 var(--fs-font-cjk); color: var(--fs-text-40);
+  font: 500 var(--fs-foot)/1.4 var(--fs-font-cjk); color: var(--fs-text-40);
   letter-spacing: 0.04em;
 }
 
@@ -974,7 +1004,7 @@ body {
 }
 .slide[data-layout="table"] .table-wrap {
   position: absolute; top: 360px; left: 96px; right: 96px; bottom: 120px;
-  display: flex; flex-direction: column;
+  display: flex; flex-direction: column; justify-content: center;
 }
 .slide[data-layout="table"] table { width: 100%; border-collapse: collapse; }
 /* 规范: table header row uses CJK font at body weight, NOT Latin-uppercase
@@ -983,13 +1013,13 @@ body {
    apparent size. Headers must be ≥ 24 px / 600 / CJK / white. */
 .slide[data-layout="table"] thead th {
   text-align: left; padding: 22px 24px;
-  font: 600 24px/1.3 var(--fs-font-cjk); letter-spacing: 0.02em;
+  font: 600 var(--fs-body)/1.3 var(--fs-font-cjk); letter-spacing: 0.02em;
   text-transform: none; color: #fff;
   border-bottom: 1px solid var(--fs-divider);
 }
 .slide[data-layout="table"] tbody td {
   padding: 26px 24px; vertical-align: top;
-  font: 500 24px/1.45 var(--fs-font-cjk); color: var(--fs-text-72);
+  font: 500 var(--fs-body)/1.45 var(--fs-font-cjk); color: var(--fs-text-72);
   border-bottom: 1px solid var(--fs-hairline);
 }
 .slide[data-layout="table"] tbody td:first-child {
@@ -1004,7 +1034,7 @@ body {
 .slide[data-layout="table"]:has(.footnote) .table-wrap { bottom: 180px; }
 .slide[data-layout="table"] .footnote {
   position: absolute; left: 96px; right: 96px; bottom: 96px;
-  font: 500 16px/1.5 var(--fs-font-cjk); color: var(--fs-text-40);
+  font: 500 var(--fs-foot)/1.5 var(--fs-font-cjk); color: var(--fs-text-40);
   letter-spacing: 0.02em;
 }
 
@@ -1036,15 +1066,15 @@ body {
   background: var(--fs-accent); box-shadow: 0 0 0 6px color-mix(in srgb, var(--fs-accent) 18%, transparent);
 }
 .slide[data-layout="timeline"] .node .when {
-  font: 700 28px/1 var(--fs-font-latin); color: #fff; letter-spacing: 0.04em;
+  font: 700 var(--fs-sub)/1 var(--fs-font-latin); color: #fff; letter-spacing: 0.04em;
 }
 .slide[data-layout="timeline"] .node .what {
-  font: 600 28px/1.3 var(--fs-font-cjk); color: #fff;
+  font: 600 var(--fs-sub)/1.3 var(--fs-font-cjk); color: #fff;
 }
 .slide[data-layout="timeline"] .node .desc {
   /* 2026-05-16: 18 → 22 — timeline node body content per SKILL.md
      typography floor. Was reading as illegible fine print on projector. */
-  font: 500 24px/1.5 var(--fs-font-cjk); color: var(--fs-text-65);
+  font: 500 var(--fs-body)/1.5 var(--fs-font-cjk); color: var(--fs-text-65);
   text-wrap: balance;   /* 2026-05-26 · even the 2-line wrap (R-VIS-ORPHAN) */
 }
 
@@ -1069,16 +1099,16 @@ body {
   display: flex; flex-direction: column; gap: 20px; position: relative;
 }
 .slide[data-layout="process"] .step .stnum {
-  font: 700 48px/1 var(--fs-font-latin); color: var(--fs-accent); opacity: 0.6;
+  font: 700 var(--fs-title)/1 var(--fs-font-latin); color: var(--fs-accent); opacity: 0.6;
 }
 .slide[data-layout="process"] .step h3 {
   /* 2026-05-17: 28 → 48 — when stnum (48 hero) is the visual anchor of
      each card, the step title must hold its own at Title tier. */
-  font: 700 48px/1.2 var(--fs-font-cjk); color: #fff;
+  font: 700 var(--fs-title)/1.2 var(--fs-font-cjk); color: #fff;
 }
 .slide[data-layout="process"] .step p {
   /* 2026-05-16: 18 → 22 — process-step body per SKILL.md typography floor. */
-  font: 500 24px/1.55 var(--fs-font-cjk); color: var(--fs-text-65);
+  font: 500 var(--fs-body)/1.55 var(--fs-font-cjk); color: var(--fs-text-65);
 }
 .slide[data-layout="process"] .step:not(:last-child)::after {
   content: ""; position: absolute; right: -22px; top: 50%;
@@ -1100,7 +1130,7 @@ body {
   gap: 14px 0;
 }
 .slide[data-layout="process"] .output .attrs > * {
-  font: 500 24px/1.4 var(--fs-font-cjk);
+  font: 500 var(--fs-body)/1.4 var(--fs-font-cjk);
   color: var(--fs-text-72);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
@@ -1121,10 +1151,10 @@ body {
    wrap it as an opt-in: data-variant="with-header". */
 .slide[data-layout="agenda"]:not([data-variant="with-header"]) .header { display: none; }
 .slide[data-layout="agenda"][data-variant="with-header"] .header {
-  position: absolute; top: 96px; left: 96px; right: 96px;
+  position: absolute; top: 61px; left: 73px; right: 320px;
 }
 .slide[data-layout="agenda"][data-variant="with-header"] .header h2 {
-  font: 700 48px/1.05 var(--fs-font-cjk); letter-spacing: -0.005em;
+  font: 700 var(--fs-title)/1.05 var(--fs-font-cjk); letter-spacing: -0.005em;
 }
 
 /* TOC = vertical pill stack, centered on canvas
@@ -1173,7 +1203,7 @@ body {
 
 /* Numeral — italic, large, brand blue */
 .slide[data-layout="agenda"] .toc .item .n {
-  font: italic 700 48px/1 var(--fs-font-latin);
+  font: italic 700 var(--fs-title)/1 var(--fs-font-latin);
   color: var(--fs-blue);
   letter-spacing: 0.04em;
 }
@@ -1182,14 +1212,14 @@ body {
 .slide[data-layout="agenda"] .toc .item .title-zh {
   /* allow:white-opacity — agenda pill text master-spec hierarchy at 0.92
      keeps the active item's 1.0 readable as "this is the section we're in". */
-  font: 600 28px/1.2 var(--fs-font-cjk);
+  font: 600 var(--fs-sub)/1.2 var(--fs-font-cjk);
   color: rgba(255,255,255,0.92);
   letter-spacing: 0.005em;
 }
 /* Bilingual EN suffix retained for opt-in bilingual decks */
 .slide[data-layout="agenda"] .toc .item .title-en {
   display: block; margin-top: 6px;
-  font: 500 16px/1.3 var(--fs-font-latin);
+  font: 500 var(--fs-foot)/1.3 var(--fs-font-latin);
   color: var(--fs-text-48);
 }
 /* If the agenda item DOM is just <div class="n">.. </div><div class="title-zh">..</div>
@@ -1219,14 +1249,14 @@ body {
   font: 700 64px/1.15 var(--fs-font-cjk); margin-bottom: 24px;
 }
 .slide[data-layout="big-stat"] .copy p {
-  font: 500 24px/1.55 var(--fs-font-cjk); color: var(--fs-text-65); max-width: 600px;
+  font: 500 var(--fs-body)/1.55 var(--fs-font-cjk); color: var(--fs-text-65); max-width: 600px;
 }
 /* 2026-05-20 · big-stat eyebrow override. Global .slide .eyebrow is 16px
    Latin (designed for footer chrome). In big-stat next to a 312px hero
    number, 16 reads as invisible. Bump to 28 (sub tier) so eyebrow earns
    its labeling role in the hero composition. */
 .slide[data-layout="big-stat"] .copy .eyebrow {
-  font-size: 28px;
+  font-size: var(--fs-sub);
   margin-bottom: 18px;
   letter-spacing: 0.08em;
 }
@@ -1317,7 +1347,7 @@ body {
   /* allow:white-opacity — small Latin contact line at bottom-left of end
      page; 0.55 is the "chrome / metadata" tone, sized 16px (Foot tier). */
   position: absolute; left: 124px; bottom: 80px;
-  font: 500 16px/1.5 var(--fs-font-latin);
+  font: 500 var(--fs-foot)/1.5 var(--fs-font-latin);
   color: rgba(255,255,255,0.55); letter-spacing: 0.06em;
 }
 /* (end .footer hide rule retired — global .slide .footer { display: none } now handles it.) */
@@ -1376,7 +1406,13 @@ body {
 .slide[data-layout="table"] .header,
 .slide[data-layout="timeline"] .header,
 .slide[data-layout="process"] .header,
-.slide[data-layout="big-stat"] .header {
+.slide[data-layout="big-stat"] .header,
+/* 2026-05-28 · `raw` joins the unified .header positioning so native-lift
+   slides (deck.json layout: "raw" with .header inside their data.html)
+   automatically get the master title coord (top:61, left:73, right:320)
+   instead of falling to top:0 static flow. Lifts that want a custom header
+   position can override via the slide's inline <style>. */
+.slide[data-layout="raw"] .header {
   position: absolute; top: 61px; left: 73px; right: 320px;  /* matches logo top */
   padding-bottom: 0; border-bottom: 0;
   display: block;
@@ -1388,7 +1424,7 @@ body {
 }
 .slide .header .eyebrow {
   display: block; margin: 14px 0 0 0;
-  font: 600 16px/1 var(--fs-font-latin); letter-spacing: 0.18em;
+  font: 600 var(--fs-foot)/1 var(--fs-font-latin); letter-spacing: 0.18em;
   color: var(--fs-accent);
 }
 .slide .header .title-zh,
@@ -1402,7 +1438,7 @@ body {
      CSS in per-page <style> blocks can adjust title margin normally;
      if you need to push a subtitle further from the title, prefer
      `margin-top` on the subtitle (see `.page-sub` default below). */
-  font: 600 48px/1.1 var(--fs-font-cjk);
+  font: 600 var(--fs-title)/1.1 var(--fs-font-cjk);
   letter-spacing: -0.005em; color: #fff;
   white-space: nowrap;                      /* 规范: single line — no wrap */
   max-width: 100%; overflow: hidden; text-overflow: ellipsis;
@@ -1418,7 +1454,7 @@ body {
        </div>
 
    Defaults (master-aligned 2026-05-15, elevated from CTG-run feedback):
-     · font-size: 28px (rung 4 on the type ladder)
+     · font-size: var(--fs-sub) (rung 4 on the type ladder)
      · color: #fff (no opacity tricks — body floor applies)
      · margin-top: 36px (= 0.82× the 44/52 px title — wide enough that
        the subtitle reads as a separate line, narrow enough to stay
@@ -1430,7 +1466,7 @@ body {
   display: block;
   margin: 36px 0 0 0;
   padding: 0;
-  font: 500 28px/1.45 var(--fs-font-cjk);
+  font: 500 var(--fs-sub)/1.45 var(--fs-font-cjk);
   letter-spacing: 0;
   color: #fff;
   max-width: 100%;
@@ -1518,7 +1554,17 @@ body {
 .slide[data-layout="timeline"]     > .stage,
 .slide[data-layout="table"]        > .stage,
 .slide[data-layout="agenda"]       > .stage,
-.slide[data-layout="stats"]        > .stage {
+.slide[data-layout="stats"]        > .stage,
+/* 2026-05-28 · `raw` joins the unified .stage positioning so native-lift
+   slides automatically get the master body-zone box (top:200, bottom:200,
+   left:96, right:96, flex column, justify-content:center). Without this,
+   lifted .stage falls to static flow → content goes edge-to-edge ("贴边")
+   because the source slide's inline .stage rule typically only overrides
+   top/bottom/gap and relies on the framework cascade for position/left/right.
+   Lifts that want a full-bleed body (e.g. a chart filling the canvas) can
+   override via the slide's inline <style> with `padding: 0` on .slide,
+   or by redeclaring .stage with their own values + !important. */
+.slide[data-layout="raw"]          > .stage {
   /* 2026-05-15 · symmetric vertical positioning so stage geometric center
      equals slide geometric center (y=540). Asymmetric top/bottom (e.g.
      220/110) shifts the stage center below the slide center, producing
@@ -1540,6 +1586,59 @@ body {
    tuned to 770 px stage. */
 .slide > .stage.stage--tall {
   top: 220px; bottom: 110px;
+}
+
+/* 2026-05-29 · CARD-FILL utility class.
+   When a flex-column card has `min-height` set for visual presence (so it's
+   taller than its content's natural height), the default `justify-content:
+   flex-start` packs content at the top with empty space at the bottom of
+   the card — feels half-filled. `justify-content: space-between` distributes
+   children evenly across the card's height, so the card content visually
+   fills the frame.
+
+   Use this WHEN the card has min-height larger than its natural content
+   height. If content fills the card naturally (content height ≥ min-height),
+   this has no effect (space-between needs slack).
+
+   This is NOT the same as BF9's "dead-middle space" anti-pattern:
+   BF9 is about ACCIDENTAL stretching (flex:1 / align-items:stretch with sparse
+   content). card-fill is about INTENTIONAL min-height for visual sizing —
+   the slack is by design, and space-between fills it deliberately.
+
+   Triggered by 2026-05-29 P15: 5-card row with min-height 640px for visual
+   presence; content packs at top, ~160px empty at bottom of each card.
+   Applying space-between distributes the 5 children (head + system + doing
+   + stuck + by) evenly. */
+.fs-card-fill {
+  justify-content: space-between !important;
+}
+
+/* 2026-05-29 · ANCHORED-TITLE STAGE pattern.
+   When `.stage` contains a TITLE element as a direct child (.ttl-block,
+   .ttl-main, .header, h1, h2), the default `justify-content: center` on
+   .stage drags the title down to vertical center — wrong: title should
+   stay anchored at TOP, body should fill remaining vertical space.
+
+   Triggered by 2026-05-29 P15 lift: source `kangshifu-8-depts` puts title
+   INSIDE .stage (with `.header { display: none }` hiding the framework
+   default header). My fix initially over-corrected: with grid content-sized,
+   stage's `justify-content: center` pulled the title down with the cards,
+   leaving empty band at top AND bottom but title not at top.
+
+   Fix: when stage has a title direct child, switch to flex-start (anchor
+   title) AND require body container to have `flex: 1 + align-content:
+   center` so it fills the remainder + centers its content within. This
+   is a framework default — authors don't need to think about it.
+
+   The body container is whatever takes flex: 1 (the author's responsibility
+   to set on the body grid / nodes / etc.). Cards inside should set their
+   own min-height for visual presence (sweet-spot ~480-560px). */
+.slide > .stage:has(> .ttl-block),
+.slide > .stage:has(> .ttl-main),
+.slide > .stage:has(> .header),
+.slide > .stage:has(> h1),
+.slide > .stage:has(> h2) {
+  justify-content: flex-start;
 }
 
 /* Inner body containers flow naturally inside .stage — override the
@@ -1715,6 +1814,23 @@ body {
     radial-gradient(55% 45% at 92% 8%, rgba(159,111,241,0.30), transparent 60%),
     radial-gradient(55% 45% at 8% 92%, rgba(60,127,255,0.22), transparent 60%);
 }
+/* 2026-05-29 · letterbox-aware decor mirror (BF15.1 framework fix).
+   mix-glow's bright zone is at 92% 8% (top-right) — on non-16:9 fullscreen
+   viewports the slide's ::before tint stops at the slide edge but the
+   letterbox area above stays untinted → visible luma jump = "上面有黑色的边".
+   Mirror decor onto `.slide-frame::after` so it covers letterbox + slide
+   uniformly, and suppress slide's own ::before to prevent double-tint
+   stacking at the slide boundary. */
+.deck[data-mode="present"] .slide-frame:has(> .slide[data-decor~="mix-glow"])::after {
+  content: ''; position: absolute; inset: 0;
+  pointer-events: none; z-index: 0;
+  background-image:
+    radial-gradient(55% 45% at 92% 8%, rgba(159,111,241,0.30), transparent 60%),
+    radial-gradient(55% 45% at 8% 92%, rgba(60,127,255,0.22), transparent 60%);
+}
+.deck[data-mode="present"] .slide-frame:has(> .slide[data-decor~="mix-glow"]) > .slide[data-decor~="mix-glow"]::before {
+  background-image: none;
+}
 
 /* teal-glow: bottom-left teal bloom (data / KPI emphasis) */
 .slide[data-decor~="teal-glow"]::before {
@@ -1726,6 +1842,17 @@ body {
 .slide[data-decor~="orange-spark"]::before {
   background-image:
     radial-gradient(40% 32% at 88% 18%, rgba(254,127,0,0.22), transparent 65%);
+}
+/* 2026-05-29 · letterbox-aware decor mirror (BF15.1 framework fix · same as mix-glow).
+   orange-spark bright zone at 88% 18% (top-right) → same letterbox luma jump issue. */
+.deck[data-mode="present"] .slide-frame:has(> .slide[data-decor~="orange-spark"])::after {
+  content: ''; position: absolute; inset: 0;
+  pointer-events: none; z-index: 0;
+  background-image:
+    radial-gradient(40% 32% at 88% 18%, rgba(254,127,0,0.22), transparent 65%);
+}
+.deck[data-mode="present"] .slide-frame:has(> .slide[data-decor~="orange-spark"]) > .slide[data-decor~="orange-spark"]::before {
+  background-image: none;
 }
 
 /* aurora: three-color ambient (matches the legacy .has-aurora class) */
@@ -1802,11 +1929,11 @@ body {
   display: inline-flex; align-items: center; gap: 10px;
   padding: 10px 18px; border-radius: 999px;
   border: 1px dashed color-mix(in srgb, var(--fs-teal) 60%, transparent);
-  font: 600 16px/1 var(--fs-font-cjk);
+  font: 600 var(--fs-foot)/1 var(--fs-font-cjk);
   color: var(--fs-teal); letter-spacing: 0.02em;
 }
 .slide .north-star::before {
-  content: "★"; font-size: 16px; color: var(--fs-teal);
+  content: "★"; font-size: var(--fs-foot); color: var(--fs-teal);
 }
 
 /* Verdict pill matrix (pattern B) — Go / Conditional / No-Go cards */
@@ -1831,7 +1958,7 @@ body {
      on dense cards and read as illegible. Now inline self-aligned-start pill
      at Body tier (24); reads as a peer label, never overlaps. */
   align-self: flex-start;
-  font: 700 24px/1 var(--fs-font-cjk); letter-spacing: 0.04em;
+  font: 700 var(--fs-body)/1 var(--fs-font-cjk); letter-spacing: 0.04em;
   padding: 10px 20px; border-radius: 999px;
   color: var(--fs-text-72);
 }
@@ -1850,14 +1977,14 @@ body {
 .slide .boundary-no  { border: 1px dashed color-mix(in srgb, var(--fs-orange) 60%, transparent); }
 .slide .boundary-yes { border: 1px solid color-mix(in srgb, var(--fs-teal) 60%, transparent); }
 .slide .boundary-no .pill, .slide .boundary-yes .pill {
-  display: inline-flex; padding: 8px 14px; font: 600 16px/1 var(--fs-font-latin);
+  display: inline-flex; padding: 8px 14px; font: 600 var(--fs-foot)/1 var(--fs-font-latin);
   letter-spacing: 0.14em; text-transform: uppercase; border-radius: 999px;
   margin-bottom: 14px;
 }
 .slide .boundary-no .pill  { background: rgba(254,127,0,0.16);  color: var(--fs-orange); }
 .slide .boundary-yes .pill { background: rgba(51,214,192,0.16); color: var(--fs-teal); }
-.slide .boundary-no .body  { font: 500 24px/1.55 var(--fs-font-cjk); color: var(--fs-text-65); text-decoration: line-through; text-decoration-color: rgba(254,127,0,.45); }
-.slide .boundary-yes .body { font: 500 24px/1.55 var(--fs-font-cjk); color: var(--fs-text); }
+.slide .boundary-no .body  { font: 500 var(--fs-body)/1.55 var(--fs-font-cjk); color: var(--fs-text-65); text-decoration: line-through; text-decoration-color: rgba(254,127,0,.45); }
+.slide .boundary-yes .body { font: 500 var(--fs-body)/1.55 var(--fs-font-cjk); color: var(--fs-text); }
 .slide .boundary-yes .hl   { color: var(--fs-teal); font-weight: 600; }
 
 /* Evolution chip (pattern F) — 现阶段 → 未来 */
@@ -1867,12 +1994,12 @@ body {
   border: 1px dashed var(--fs-text-16);
 }
 .slide .evolution-chip .stage-tag {
-  font: 600 16px/1 var(--fs-font-latin); letter-spacing: 0.18em;
+  font: 600 var(--fs-foot)/1 var(--fs-font-latin); letter-spacing: 0.18em;
   text-transform: uppercase; color: var(--fs-text-48);
   white-space: nowrap;
 }
 .slide .evolution-chip .stage-body {
-  font: 500 24px/1.4 var(--fs-font-cjk); color: var(--fs-text);
+  font: 500 var(--fs-body)/1.4 var(--fs-font-cjk); color: var(--fs-text);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .slide .evolution-chip .stage-body.is-future { color: var(--fs-teal); font-weight: 600; }
@@ -1889,7 +2016,7 @@ body {
      Per SKILL.md: "Content chips that carry meaning ≥ 18 px min" — but
      these are headline strategy labels, treated as body. */
   display: inline-flex; align-items: center; gap: 10px;
-  font: 600 24px/1.2 var(--fs-font-cjk);
+  font: 600 var(--fs-body)/1.2 var(--fs-font-cjk);
 }
 .slide .principle-band .principle::before {
   content: ""; width: 8px; height: 8px; border-radius: 999px;
@@ -1938,7 +2065,7 @@ body {
     color-mix(in srgb, var(--fs-blue) 22%, transparent),
     color-mix(in srgb, var(--fs-purple) 14%, transparent));
   border: 1px solid color-mix(in srgb, var(--fs-blue) 45%, transparent);
-  font: 700 24px/1.3 var(--fs-font-cjk);
+  font: 700 var(--fs-body)/1.3 var(--fs-font-cjk);
   color: var(--fs-text);
   letter-spacing: 0.06em;
   display: inline-flex; align-items: center; gap: 14px;
@@ -1970,19 +2097,19 @@ body {
 }
 .slide .arch-hand-title { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
 .slide .arch-hand-title h3 {
-  font: 700 28px/1.2 var(--fs-font-cjk);
+  font: 700 var(--fs-sub)/1.2 var(--fs-font-cjk);
   color: var(--fs-text);
 }
 .slide .arch-hand-title .em {
   /* 2026-05-16: 16 → 22 — EN motto under hand title is a content sub-line
      (carries the architecture's English name); per SKILL.md it's body. */
-  font: 600 24px/1.2 var(--fs-font-latin);
+  font: 600 var(--fs-body)/1.2 var(--fs-font-latin);
   letter-spacing: 0.18em;
   color: var(--fs-text-72);
 }
 .slide .arch-hand .sub {
   /* 2026-05-16: 20 → 22 — hand explanation line per SKILL.md body floor. */
-  font: 500 24px/1.5 var(--fs-font-cjk);
+  font: 500 var(--fs-body)/1.5 var(--fs-font-cjk);
   color: var(--fs-text-72);
 }
 .slide .arch-items { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
@@ -1991,7 +2118,7 @@ body {
   display: flex; align-items: center; gap: 14px;
   padding: 14px 16px; border-radius: 10px;
   background: rgba(255,255,255,0.05);
-  font: 500 24px/1.45 var(--fs-font-cjk);
+  font: 500 var(--fs-body)/1.45 var(--fs-font-cjk);
   color: var(--fs-text);
 }
 .slide .arch-item .n {
@@ -1999,7 +2126,7 @@ body {
   border-radius: 8px;
   display: grid; place-items: center;
   background: var(--fs-blue); color: #fff;
-  font: 700 16px/1 var(--fs-font-cjk);
+  font: 700 var(--fs-foot)/1 var(--fs-font-cjk);
 }
 .slide .arch-hand.right .arch-item .n { background: var(--fs-teal); color: #0A0E1B; }
 .slide .arch-base {
@@ -2010,7 +2137,7 @@ body {
     color-mix(in srgb, var(--fs-teal) 12%, transparent));
   border: 1px dashed color-mix(in srgb, var(--fs-text) 18%, transparent);
   text-align: center;
-  font: 500 24px/1.45 var(--fs-font-cjk);
+  font: 500 var(--fs-body)/1.45 var(--fs-font-cjk);
   color: var(--fs-text-72);
   letter-spacing: 0.04em;
 }
@@ -2085,7 +2212,7 @@ body {
 }
 .slide .desktop-frame .iframe-hint {
   position: absolute; top: 16px; right: 16px;
-  font: 600 16px/1 var(--fs-font-latin); letter-spacing: 0.14em;
+  font: 600 var(--fs-foot)/1 var(--fs-font-latin); letter-spacing: 0.14em;
   text-transform: uppercase;
   background: rgba(60,127,255,0.85); color: #fff;
   padding: 8px 14px; border-radius: 999px;
@@ -2184,7 +2311,7 @@ body {
   padding: 14px 18px;
   border-bottom: 1px solid rgba(255,255,255,0.06);
   background: rgba(255,255,255,0.02);
-  font: 500 16px/1 var(--fs-font-cjk);
+  font: 500 var(--fs-foot)/1 var(--fs-font-cjk);
   color: var(--fs-text-72);
 }
 .slide .ui-traffic-lights {
@@ -2212,7 +2339,7 @@ body {
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 999px;
   padding: 8px 18px;
-  font: 500 16px/1 var(--fs-font-latin);
+  font: 500 var(--fs-foot)/1 var(--fs-font-latin);
   color: var(--fs-text-72);
   letter-spacing: 0.02em;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -2241,7 +2368,7 @@ body {
   display: flex; flex-direction: column; gap: 4px;
 }
 .slide .ui-sidebar .ui-section {
-  font: 600 16px/1 var(--fs-font-latin); letter-spacing: 0.14em;
+  font: 600 var(--fs-foot)/1 var(--fs-font-latin); letter-spacing: 0.14em;
   text-transform: uppercase; color: var(--fs-text-40);
   padding: 14px 12px 8px;
 }
@@ -2262,7 +2389,7 @@ body {
 .slide .ui-tab {
   position: relative;
   padding: 10px 16px;
-  font: 500 16px/1.2 var(--fs-font-cjk);
+  font: 500 var(--fs-foot)/1.2 var(--fs-font-cjk);
   color: var(--fs-text-48);
   border-radius: 8px;
   cursor: default;
@@ -2289,7 +2416,7 @@ body {
   gap: 14px;
   padding: 14px 18px;
   border-bottom: 1px solid rgba(255,255,255,0.04);
-  font: 500 16px/1.4 var(--fs-font-cjk);
+  font: 500 var(--fs-foot)/1.4 var(--fs-font-cjk);
   color: var(--fs-text-72);
 }
 .slide .ui-list-item.is-selected {
@@ -2297,7 +2424,7 @@ body {
   color: #fff;
 }
 .slide .ui-list-item .ui-meta {
-  font: 500 16px/1 var(--fs-font-latin);
+  font: 500 var(--fs-foot)/1 var(--fs-font-latin);
   color: var(--fs-text-40); letter-spacing: 0.02em;
   white-space: nowrap;
 }
@@ -2305,11 +2432,11 @@ body {
   display: flex; flex-direction: column; gap: 4px; min-width: 0;
 }
 .slide .ui-list-item .ui-line .name {
-  font-size: 16px; color: #fff; font-weight: 600;
+  font-size: var(--fs-foot); color: #fff; font-weight: 600;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .slide .ui-list-item .ui-line .preview {
-  font-size: 16px; color: var(--fs-text-48);
+  font-size: var(--fs-foot); color: var(--fs-text-48);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
@@ -2319,7 +2446,7 @@ body {
   width: 40px; height: 40px; border-radius: 999px;
   display: grid; place-items: center;
   background: color-mix(in srgb, var(--fs-blue) 22%, #131723);
-  color: #fff; font: 700 16px/1 var(--fs-font-latin);
+  color: #fff; font: 700 var(--fs-foot)/1 var(--fs-font-latin);
   letter-spacing: 0.02em; text-transform: uppercase;
 }
 /* Per-tone variants — rgba baked statically (was color-mix). Identical visual,
@@ -2327,8 +2454,8 @@ body {
 .slide .ui-avatar[data-tone="teal"]   { background: #1F2D34; background: rgba(51,214,192,0.26); }
 .slide .ui-avatar[data-tone="purple"] { background: #1E1A38; background: rgba(92,63,251,0.26); }
 .slide .ui-avatar[data-tone="orange"] { background: #292019; background: rgba(254,127,0,0.26); }
-.slide .ui-avatar.lg { width: 56px; height: 56px; font-size: 24px; }
-.slide .ui-avatar.sm { width: 32px; height: 32px; font-size: 16px; }
+.slide .ui-avatar.lg { width: 56px; height: 56px; font-size: var(--fs-body); }
+.slide .ui-avatar.sm { width: 32px; height: 32px; font-size: var(--fs-foot); }
 
 /* ---- Chat bubbles ---- */
 
@@ -2336,7 +2463,7 @@ body {
   max-width: 70%;
   padding: 14px 18px;
   border-radius: 16px;
-  font: 500 16px/1.45 var(--fs-font-cjk);
+  font: 500 var(--fs-foot)/1.45 var(--fs-font-cjk);
   background: rgba(255,255,255,0.06);
   color: var(--fs-text);
   border: 1px solid rgba(255,255,255,0.04);
@@ -2365,7 +2492,7 @@ body {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.10);
   border-radius: 10px;
-  font: 500 16px/1.3 var(--fs-font-cjk);
+  font: 500 var(--fs-foot)/1.3 var(--fs-font-cjk);
   color: #fff;
 }
 .slide .ui-input::placeholder { color: var(--fs-text-40); }
@@ -2376,7 +2503,7 @@ body {
   padding: 12px 22px;
   border-radius: 10px;
   border: 1px solid transparent;
-  font: 600 16px/1 var(--fs-font-cjk);
+  font: 600 var(--fs-foot)/1 var(--fs-font-cjk);
   cursor: default;
 }
 .slide .ui-btn.is-primary {
@@ -2407,21 +2534,21 @@ body {
   padding: 12px 16px;
   border-right: 1px solid rgba(255,255,255,0.04);
   border-bottom: 1px solid rgba(255,255,255,0.04);
-  font: 500 16px/1.3 var(--fs-font-cjk);
+  font: 500 var(--fs-foot)/1.3 var(--fs-font-cjk);
   color: var(--fs-text-72);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .slide .ui-grid .ui-cell.is-header {
   background: rgba(255,255,255,0.04);
   color: #fff; font-weight: 600;
-  font-size: 16px; letter-spacing: 0.04em;
+  font-size: var(--fs-foot); letter-spacing: 0.04em;
 }
 .slide .ui-grid .ui-cell.is-tag {
   display: inline-block;
 }
 .slide .ui-grid .ui-cell .ui-pill {
   display: inline-block; padding: 4px 10px; border-radius: 999px;
-  font: 600 16px/1 var(--fs-font-latin); letter-spacing: 0.06em;
+  font: 600 var(--fs-foot)/1 var(--fs-font-latin); letter-spacing: 0.06em;
 }
 /* Per-tone pill backgrounds — rgba baked (was color-mix). */
 .slide .ui-grid .ui-cell .ui-pill[data-tone="teal"]   { background: rgba(51,214,192,0.18);  color: var(--fs-teal); }
@@ -2443,7 +2570,7 @@ body {
   display: inline-grid; place-items: center;
   min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px;
   background: var(--fs-blue); color: #fff;
-  font: 700 16px/1 var(--fs-font-latin);
+  font: 700 var(--fs-foot)/1 var(--fs-font-latin);
 }
 .slide .ui-badge.is-mute { background: rgba(255,255,255,0.16); color: var(--fs-text-72); }
 
@@ -2516,7 +2643,7 @@ body {
    Matches the v3 reference where number+icon header creates a strong eyebrow. */
 .slide .card .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .slide .card .num {
-  font: 700 28px/1 var(--fs-font-cjk);
+  font: 700 var(--fs-sub)/1 var(--fs-font-cjk);
   color: var(--fs-text-48);  /* was --fs-text-50 (undefined, silent fallback to currentColor) */
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
@@ -2530,7 +2657,7 @@ body {
   margin-top: 24px;
   padding: 14px 0 14px 28px;
   border-left: 4px solid var(--fs-teal);
-  font: 600 28px/1.45 var(--fs-font-cjk);
+  font: 600 var(--fs-sub)/1.45 var(--fs-font-cjk);
   color: var(--fs-text);
   max-width: 1400px;
 }
@@ -2554,12 +2681,12 @@ body {
 .slide .voice-card::before {
   content: "\201C";
   position: absolute; top: 6px; left: 24px;
-  font: 48px/1 Georgia, serif;
+  font: var(--fs-title)/1 Georgia, serif;
   color: var(--fs-blue);
   opacity: 0.45;
 }
 .slide .voice-card .q {
-  font: 500 24px/1.7 var(--fs-font-cjk);
+  font: 500 var(--fs-body)/1.7 var(--fs-font-cjk);
   color: var(--fs-text);
   margin-top: 36px;
 }
@@ -2567,7 +2694,7 @@ body {
   /* 2026-05-16: 18 → 22 — customer/attribution name MUST be legible on
      projector; this is content, not chrome. Use .attrib (14 px chrome)
      for anonymous attribution like "anonymous source · 2024 industry data". */
-  font: 500 24px/1.4 var(--fs-font-cjk);
+  font: 500 var(--fs-body)/1.4 var(--fs-font-cjk);
   color: var(--fs-text-72);
   letter-spacing: 0.04em;
   border-top: 1px dashed var(--fs-hairline);
@@ -2593,13 +2720,13 @@ body {
   border-color: color-mix(in srgb, var(--fs-teal) 40%, transparent);
 }
 .slide .cta-box .l h3 {
-  font: 700 28px/1.3 var(--fs-font-cjk);
+  font: 700 var(--fs-sub)/1.3 var(--fs-font-cjk);
   color: var(--fs-text);
   margin-bottom: 8px;
 }
 .slide .cta-box .l p {
   /* 2026-05-16: 20 → 22 — CTA explanation body per SKILL.md body floor. */
-  font: 500 24px/1.55 var(--fs-font-cjk);
+  font: 500 var(--fs-body)/1.55 var(--fs-font-cjk);
   color: var(--fs-text-72);
 }
 .slide .cta-box .cta-btn {
@@ -2611,7 +2738,7 @@ body {
   border-radius: var(--fs-radius-pill);
   background: var(--fs-text);
   color: var(--fs-bg-1);  /* was --fs-bg (undefined, silent fallback to currentColor → invisible on white bg) */
-  font: 700 24px/1 var(--fs-font-cjk);
+  font: 700 var(--fs-body)/1 var(--fs-font-cjk);
   letter-spacing: 0.04em;
   cursor: pointer;
   transition:
@@ -2646,7 +2773,7 @@ body {
   text-align: center;
 }
 .slide .kpi-strip .kpi .v {
-  font: 800 28px/1.1 var(--fs-font-cjk);
+  font: 800 var(--fs-sub)/1.1 var(--fs-font-cjk);
   color: var(--fs-text);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
@@ -2655,7 +2782,7 @@ body {
 .slide .kpi-strip .kpi .v.is-blue   { color: var(--fs-blue);   }
 .slide .kpi-strip .kpi .v.is-orange { color: var(--fs-orange); }
 .slide .kpi-strip .kpi .l {
-  font: 500 24px/1.4 var(--fs-font-cjk);
+  font: 500 var(--fs-body)/1.4 var(--fs-font-cjk);
   color: var(--fs-text-72);
   margin-top: 6px;
 }
@@ -2681,7 +2808,7 @@ body {
 }
 .slide .calc-row:last-of-type { border-bottom: 0; }
 .slide .calc-row label {
-  font: 500 24px/1.4 var(--fs-font-cjk);
+  font: 500 var(--fs-body)/1.4 var(--fs-font-cjk);
   color: var(--fs-text-72);
 }
 .slide .calc-row input[type="range"] {
@@ -2708,7 +2835,7 @@ body {
   box-shadow: 0 0 0 4px rgba(60,127,255,0.30);
 }
 .slide .calc-row .v {
-  font: 700 24px/1 var(--fs-font-cjk);
+  font: 700 var(--fs-body)/1 var(--fs-font-cjk);
   color: var(--fs-teal);
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -2722,12 +2849,12 @@ body {
   display: flex; justify-content: space-between; align-items: center; gap: 24px;
 }
 .slide .calc-result .lbl {
-  font: 500 24px/1.4 var(--fs-font-cjk);
+  font: 500 var(--fs-body)/1.4 var(--fs-font-cjk);
   color: var(--fs-text);
   letter-spacing: 0.04em;
 }
 .slide .calc-result .amount {
-  font: 800 48px/1 var(--fs-font-cjk);
+  font: 800 var(--fs-title)/1 var(--fs-font-cjk);
   background: var(--fs-grad-keyline);
   -webkit-background-clip: text; background-clip: text;
   color: transparent;
@@ -2735,7 +2862,7 @@ body {
   letter-spacing: -0.02em;
 }
 .slide .calc-hint {
-  font: italic 500 16px/1.55 var(--fs-font-cjk);
+  font: italic 500 var(--fs-foot)/1.55 var(--fs-font-cjk);
   color: var(--fs-text-48);  /* was --fs-text-50 (undefined, silent fallback) */
   letter-spacing: 0.04em;
 }
@@ -2750,7 +2877,7 @@ body {
   padding: 14px 18px;
   background: rgba(255,255,255,0.03);
   border-radius: 12px;
-  font: 500 24px/1.4 var(--fs-font-cjk);
+  font: 500 var(--fs-body)/1.4 var(--fs-font-cjk);
   color: var(--fs-text-72);
 }
 .slide .ui-row .lbl { color: var(--fs-text-72); }
@@ -2769,18 +2896,18 @@ body {
   border: 1px solid color-mix(in srgb, var(--fs-orange) 35%, transparent);
 }
 .slide .ui-alert .t {
-  font: 700 16px/1 var(--fs-font-cjk);
+  font: 700 var(--fs-foot)/1 var(--fs-font-cjk);
   letter-spacing: 0.18em;
   color: var(--fs-orange);
   margin-bottom: 8px;
 }
 .slide .ui-alert h5 {
-  font: 700 24px/1.3 var(--fs-font-cjk);
+  font: 700 var(--fs-body)/1.3 var(--fs-font-cjk);
   color: var(--fs-text);
   margin-bottom: 6px;
 }
 .slide .ui-alert p {
-  font: 500 16px/1.55 var(--fs-font-cjk);
+  font: 500 var(--fs-foot)/1.55 var(--fs-font-cjk);
   color: var(--fs-text-72);
 }
 
@@ -2791,19 +2918,19 @@ body {
   border: 1px solid color-mix(in srgb, var(--fs-blue) 35%, transparent);
 }
 .slide .ui-kpi .t {
-  font: 700 16px/1 var(--fs-font-cjk);
+  font: 700 var(--fs-foot)/1 var(--fs-font-cjk);
   letter-spacing: 0.18em;
   color: var(--fs-blue);
   margin-bottom: 8px;
 }
 .slide .ui-kpi .v {
-  font: 800 28px/1 var(--fs-font-cjk);
+  font: 800 var(--fs-sub)/1 var(--fs-font-cjk);
   color: var(--fs-text);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
 }
 .slide .ui-kpi .d {
-  font: 600 16px/1.4 var(--fs-font-cjk);
+  font: 600 var(--fs-foot)/1.4 var(--fs-font-cjk);
   color: var(--fs-teal);
   margin-top: 4px;
 }
@@ -2832,7 +2959,7 @@ body {
   gap: 18px;
 }
 .slide .data-panel > h4 {
-  font: 600 24px/1.3 var(--fs-font-cjk);
+  font: 600 var(--fs-body)/1.3 var(--fs-font-cjk);
   color: var(--fs-text);
   letter-spacing: 0.02em;
   margin: 0;
@@ -2850,13 +2977,13 @@ body {
   display: flex;
   gap: 18px;
   align-items: baseline;
-  font: 500 24px/1.45 var(--fs-font-cjk);
+  font: 500 var(--fs-body)/1.45 var(--fs-font-cjk);
   color: var(--fs-text);
 }
 .slide .data-panel .row::before {
   content: "▸";
   color: var(--fs-blue);
-  font-size: 16px;
+  font-size: var(--fs-foot);
   flex-shrink: 0;
 }
 .slide .data-panel .row .lbl { flex: 1;          color: var(--fs-text); }
@@ -2946,28 +3073,28 @@ body {
   box-shadow: 0 0 0 4px rgba(60, 127, 255, 0.10);
 }
 .slide .ns-card .idx {
-  font: 800 48px/1 var(--fs-font-cjk);
+  font: 800 var(--fs-title)/1 var(--fs-font-cjk);
   letter-spacing: -0.02em;
   color: var(--fs-blue);
 }
 .slide .ns-card h4 {
-  font: 700 28px/1.3 var(--fs-font-cjk);
+  font: 700 var(--fs-sub)/1.3 var(--fs-font-cjk);
   color: var(--fs-text);
   margin: 0;
 }
 .slide .ns-card .star-label,
 .slide .ns-card .core-label {
-  font: 700 16px/1 var(--fs-font-cjk);
+  font: 700 var(--fs-foot)/1 var(--fs-font-cjk);
   letter-spacing: 0.18em;
   color: var(--fs-text-72);
   margin-top: 4px;
 }
 .slide .ns-card .star {
-  font: 700 24px/1.3 var(--fs-font-cjk);
+  font: 700 var(--fs-body)/1.3 var(--fs-font-cjk);
   color: var(--fs-teal);
 }
 .slide .ns-card .core {
-  font: 600 16px/1.4 var(--fs-font-cjk);
+  font: 600 var(--fs-foot)/1.4 var(--fs-font-cjk);
   color: var(--fs-text);
 }
 .slide .ns-card .tags {
@@ -2979,7 +3106,7 @@ body {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 .slide .ns-card .tag-chip {
-  font: 600 16px/1.3 var(--fs-font-cjk);
+  font: 600 var(--fs-foot)/1.3 var(--fs-font-cjk);
   padding: 6px 10px;
   border-radius: 7px;
   border: 1px solid rgba(255, 255, 255, 0.10);
@@ -3056,7 +3183,7 @@ body {
   display: flex; align-items: center; gap: 12px;
 }
 .slide .scene-card .sc-name {
-  font: 700 24px/1.2 var(--fs-font-cjk);
+  font: 700 var(--fs-body)/1.2 var(--fs-font-cjk);
   color: var(--fs-text);
   letter-spacing: -0.005em;
 }
@@ -3068,20 +3195,20 @@ body {
   border: 0;
 }
 .slide .scene-card .sc-label {
-  font: 700 16px/1 var(--fs-font-cjk);
+  font: 700 var(--fs-foot)/1 var(--fs-font-cjk);
   letter-spacing: 0.18em;
   color: currentColor;
 }
 .slide .scene-card .sc-obj {
   /* 2026-05-16: 18 → 22 — scene-card "个性化对象" body line per body floor.
      The 6-up grid is dense, but 18 px reads as fine print on projector. */
-  font: 600 24px/1.45 var(--fs-font-cjk);
+  font: 600 var(--fs-body)/1.45 var(--fs-font-cjk);
   color: var(--fs-text);
 }
 .slide .scene-card .sc-lever {
   /* 2026-05-16: 16 → 22 — scene-card economic-lever line is the rhetorical
      hook per SKILL.md scene-grid recipe; MUST be legible. */
-  font: 500 24px/1.45 var(--fs-font-cjk);
+  font: 500 var(--fs-body)/1.45 var(--fs-font-cjk);
   color: var(--fs-text-72);
   padding: 10px 12px;
   border-radius: 8px;
@@ -3110,7 +3237,7 @@ body {
   background: rgba(255,255,255,0.04);
   border-left: 3px solid var(--fs-teal);
   border-radius: 8px;
-  font: 500 24px/1.55 var(--fs-font-cjk);
+  font: 500 var(--fs-body)/1.55 var(--fs-font-cjk);
   color: var(--fs-text-72);
   display: flex; align-items: flex-start; gap: 14px;
 }
@@ -3121,7 +3248,7 @@ body {
   border-radius: 6px;
   background: rgba(51,214,192,0.15);
   color: var(--fs-teal);
-  font: 700 16px/1.3 var(--fs-font-cjk);
+  font: 700 var(--fs-foot)/1.3 var(--fs-font-cjk);
   letter-spacing: 0.06em;
 }
 .slide .report-item.is-warn { border-left-color: var(--fs-orange); }
@@ -3383,6 +3510,34 @@ body {
   .deck[data-mode="present"] ~ .fs-mobile-pageno { display: block; }
 }
 
+/* ============================================================================
+   规范 L3 分布修复 sweep(2026-05-30)— 把 content-3up 的"内容尺寸+居中"
+   correct-by-construction 打法推广到其它多卡/多块版式。每条都 scoped 到该版式的
+   渲染结构,不动全局 1722 行 legacy stretch;均经 assets/check-distribution.py
+   注入测 + 真渲染验证:目标版式不均内容 findings 下降、零回归。
+   (content-3up 的那条在 ~778 行;extras 版式 matrix/before-after/logo-wall 在
+    deck-json/templates/extra-layouts.css 末尾同名 sweep 块。
+    stats 故意不改 —— KPI 列顶基线对齐是正确阅读结构,几何"均衡"反而破坏它。)
+   ============================================================================ */
+
+/* content-2col:两列都含 framed box 时 un-stretch,让框共享竖直中线(治左高右低)。
+   :not(:has(> .col-visual[min-height])) 守住 BF7 raw hero-image(它靠 stretch 让
+   col-text space-between 贴到图片上下沿)。canonical 2col 本就免疫,这是 hardening。 */
+.slide[data-layout="content-2col"] .grid:not(:has(> .col-visual[style*="min-height"])) {
+  align-items: center;
+}
+.slide[data-layout="content-2col"] .grid:not(:has(> .col-visual[style*="min-height"])) > .col-text {
+  align-self: stretch;
+  justify-content: center;
+}
+
+/* process:步骤卡同 content-3up —— 按内容尺寸 + 共享中线 + 卡内垂直居中,
+   消除内容最多那张挤底、其余顶锚空一大片。 */
+.slide[data-layout="process"] .flow > .step {
+  align-self: center;
+  justify-content: center;
+}
+
 /* === Inlined brand assets (single-file delivery mode) === */
 :root {
   --fs-asset-logo: url("data:image/png;base64,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");
@@ -3428,18 +3583,18 @@ body {
 
 <!-- 02 Agenda ============================================================== -->
 <div class="slide-frame">
-  <div class="slide" data-layout="agenda" data-screen-label="02 Agenda" data-slide-key="agenda">
+  <div class="slide" data-layout="agenda" data-variant="with-header" data-screen-label="02 Agenda" data-slide-key="agenda">
     <div class="wordmark" data-text-id="slide-02.wordmark">飞书</div>
     <div class="header">
       <h2 class="title-zh" data-text-id="slide-02.title_zh">本次汇报共六个部分</h2>
     </div>
     <div class="toc">
-      <div class="item"><div class="n" data-text-id="slide-02.n">01</div><div><div class="title-zh" data-text-id="slide-02.title_zh_02">背景与挑战</div><div class="title-en" data-allow-body-floor data-text-id="slide-02.title_en">Context and challenges</div></div></div>
-      <div class="item"><div class="n" data-text-id="slide-02.n_02">02</div><div><div class="title-zh" data-text-id="slide-02.title_zh_03">先进团队的工作方式</div><div class="title-en" data-allow-body-floor data-text-id="slide-02.title_en_02">How advanced teams work</div></div></div>
-      <div class="item"><div class="n" data-text-id="slide-02.n_03">03</div><div><div class="title-zh" data-text-id="slide-02.title_zh_04">飞书平台能力</div><div class="title-en" data-allow-body-floor data-text-id="slide-02.title_en_03">Lark platform capabilities</div></div></div>
-      <div class="item"><div class="n" data-text-id="slide-02.n_04">04</div><div><div class="title-zh" data-text-id="slide-02.title_zh_05">客户实证</div><div class="title-en" data-allow-body-floor data-text-id="slide-02.title_en_04">Customer evidence</div></div></div>
-      <div class="item"><div class="n" data-text-id="slide-02.n_05">05</div><div><div class="title-zh" data-text-id="slide-02.title_zh_06">部署与服务</div><div class="title-en" data-allow-body-floor data-text-id="slide-02.title_en_05">Rollout and service</div></div></div>
-      <div class="item"><div class="n" data-text-id="slide-02.n_06">06</div><div><div class="title-zh" data-text-id="slide-02.title_zh_07">下一步</div><div class="title-en" data-allow-body-floor data-text-id="slide-02.title_en_06">Next steps</div></div></div>
+      <div class="item"><div class="n" data-text-id="slide-02.n">01</div><div><div class="title-zh" data-text-id="slide-02.title_zh_02">背景与挑战</div><div class="title-en" data-text-id="slide-02.title_en">Context and challenges</div></div></div>
+      <div class="item"><div class="n" data-text-id="slide-02.n_02">02</div><div><div class="title-zh" data-text-id="slide-02.title_zh_03">先进团队的工作方式</div><div class="title-en" data-text-id="slide-02.title_en_02">How advanced teams work</div></div></div>
+      <div class="item"><div class="n" data-text-id="slide-02.n_03">03</div><div><div class="title-zh" data-text-id="slide-02.title_zh_04">飞书平台能力</div><div class="title-en" data-text-id="slide-02.title_en_03">Lark platform capabilities</div></div></div>
+      <div class="item"><div class="n" data-text-id="slide-02.n_04">04</div><div><div class="title-zh" data-text-id="slide-02.title_zh_05">客户实证</div><div class="title-en" data-text-id="slide-02.title_en_04">Customer evidence</div></div></div>
+      <div class="item"><div class="n" data-text-id="slide-02.n_05">05</div><div><div class="title-zh" data-text-id="slide-02.title_zh_06">部署与服务</div><div class="title-en" data-text-id="slide-02.title_en_05">Rollout and service</div></div></div>
+      <div class="item"><div class="n" data-text-id="slide-02.n_06">06</div><div><div class="title-zh" data-text-id="slide-02.title_zh_07">下一步</div><div class="title-en" data-text-id="slide-02.title_en_06">Next steps</div></div></div>
     </div>
   </div>
 </div>
@@ -3463,7 +3618,7 @@ body {
 
 <!-- 04 Content 3-up ======================================================= -->
 <div class="slide-frame">
-  <div class="slide" data-layout="content-3up" data-screen-label="04 Content" data-slide-key="three-pillars">
+  <div class="slide" data-layout="content-3up" data-allow-no-focal data-screen-label="04 Content" data-slide-key="three-pillars">
     <div class="wordmark" data-text-id="slide-04.wordmark">飞书</div>
     <div class="header">
       <h2 class="title-zh" data-text-id="slide-04.title_zh">先进团队的三大工作方式</h2>
@@ -3791,6 +3946,156 @@ body {
 
   let activeController = null;       // tracks the current init's AbortController
 
+  // ============================================================
+  // Runtime auto-balance (2026-05-30): after scale-to-fit, geometrically fix
+  // mis-distributed boxes so RAW / legacy decks (which bypass the schema
+  // correct-by-construction defaults) come out balanced ON LOAD — not
+  // detected-then-fixed. name-free / geometric (no layout-name whitelist).
+  //  · measurement-gated: only touches slides that actually measure crowded.
+  //  · apply-measure-keep-or-revert: a correction is kept ONLY if it reduces
+  //    crowding without introducing new canvas overflow → never makes a slide
+  //    worse (genuinely over-full boxes, e.g. content 161px too tall, revert).
+  //  · skips hero layouts, [data-allow-imbalance], [data-no-autobalance] decks.
+  //  · content-visibility hides non-current slides in present mode, so each
+  //    slide is balanced the first time it is actually laid out (initial pass
+  //    for current/scroll slides, the is-current observer for the rest).
+  //  · NO new ResizeObserver / addEventListener — stays within P52/P53 budget.
+  // ============================================================
+  const HERO_AB = new Set(['cover', 'section', 'big-stat', 'quote', 'image-text', 'end']);
+  const _abHasText = (el) => {
+    for (const n of el.childNodes) if (n.nodeType === 3 && n.textContent.trim()) return true;
+    return false;
+  };
+  const _abTextUnion = (root) => {
+    let t = Infinity, b = -Infinity, any = false;
+    root.querySelectorAll('*').forEach((el) => {
+      if (/^(SVG|svg|SCRIPT|STYLE)$/.test(el.tagName) || !_abHasText(el)) return;
+      const cs = getComputedStyle(el);
+      if (cs.visibility === 'hidden' || cs.display === 'none' || +cs.opacity === 0) return;
+      const r = el.getBoundingClientRect();
+      if (r.width < 2 || r.height < 2) return;
+      any = true; t = Math.min(t, r.top); b = Math.max(b, r.bottom);
+    });
+    return any ? { top: t, bottom: b } : null;
+  };
+  const _abFramed = (el) => {
+    const cs = getComputedStyle(el);
+    const border = ['Top', 'Right', 'Bottom', 'Left'].some((s) =>
+      parseFloat(cs['border' + s + 'Width'] || 0) > 0 &&
+      !/transparent|rgba\(0, 0, 0, 0\)/.test(cs['border' + s + 'Color']));
+    const bg = cs.backgroundColor && !/transparent|rgba\(0, 0, 0, 0\)/.test(cs.backgroundColor);
+    const bgi = cs.backgroundImage && cs.backgroundImage !== 'none';
+    return border || bg || bgi;
+  };
+  const _abMedia = (el) => {
+    const cs = getComputedStyle(el);
+    if (cs.backgroundImage && cs.backgroundImage !== 'none' && !/gradient/i.test(cs.backgroundImage)) return true;
+    if (el.querySelector('img,iframe,canvas,video,picture')) return true;
+    const raw = el.className, c = (raw && raw.baseVal !== undefined ? raw.baseVal : (raw || '')).toString();
+    return /\b(photo|image|img|visual|mock|thumb|avatar|portrait|media|phone|screen)\b/i.test(c);
+  };
+  // Per-slide measurement: crowd severity (framed box text jammed against its
+  // bottom edge) + spill (how far any framed box bottom passes the slide edge).
+  function _abMeasure(slide) {
+    const scale = parseFloat(getComputedStyle(slide).getPropertyValue('--fs-scale')) || 1;
+    const sb = slide.getBoundingClientRect().bottom;
+    const all = [...slide.querySelectorAll('*')].filter((el) =>
+      _abFramed(el) && !_abMedia(el) && el.getBoundingClientRect().height > 80 * scale);
+    const boxes = all.filter((el) => !all.some((o) => o !== el && o.contains(el)));
+    let severity = 0, spill = 0, overflow = 0; const crowded = [], overflowed = [];
+    for (const box of boxes) {
+      const r = box.getBoundingClientRect();
+      spill = Math.max(spill, (r.bottom - sb) / scale);
+      const cu = _abTextUnion(box); if (!cu) continue;
+      const distTop = (cu.top - r.top) / scale, distBottom = (r.bottom - cu.bottom) / scale;
+      // 文字溢出框底(distBottom<0)= grow-box 的对象:框被写死/挤扁,内容掉出去。
+      if (distBottom < -1) { overflow += (-distBottom); overflowed.push([box, -distBottom]); }
+      if (distBottom < 10 && distTop > distBottom + 16) { crowded.push(box); severity += (16 - distBottom); }
+    }
+    return { severity, spill, overflow, crowded, overflowed };
+  }
+  // HARD RULE (death rule): auto-balance must NEVER move a content-page title
+  // or subtitle. These positions are snapshotted before any correction and
+  // re-checked after — if a correction shifts ANY of them, the whole slide is
+  // reverted. Belt: corrections only un-stretch the crowded box's FRAMED peers,
+  // never title/non-box siblings.
+  const _abTitleEls = (slide) => [...slide.querySelectorAll(
+    '.header, .title-zh, .title-en, .subtitle, .eyebrow, .kicker, ' +
+    '.header h1, .header h2, .header h3')];
+
+  function balanceSlide(slide) {
+    const layout = slide.getAttribute('data-layout') || '';
+    if (HERO_AB.has(layout) || slide.hasAttribute('data-allow-imbalance')) return;
+    const before = _abMeasure(slide);
+    if (before.severity === 0 && before.overflow === 0) return;  // balanced → no-op (schema decks)
+    // Snapshot title/subtitle positions — they may not move (hard rule).
+    const titleSnap = _abTitleEls(slide).map((el) => {
+      const r = el.getBoundingClientRect(); return [el, r.top, r.left];
+    });
+    // Correction: un-stretch the crowded box's FRAMED peers only (content-sized
+    // + shared centerline; never a title/other sibling) + center content
+    // vertically inside flex-column boxes — the content-3up fix on raw geometry.
+    const touched = [];
+    const rows = new Set();
+    before.crowded.forEach((box) => { if (box.parentElement) rows.add(box.parentElement); });
+    rows.forEach((p) => {
+      for (const ch of p.children) {
+        if (ch.nodeType !== 1 || !_abFramed(ch) || _abMedia(ch)) continue;  // peers only
+        touched.push([ch, 'alignSelf', ch.style.alignSelf]);
+        ch.style.alignSelf = 'center';
+      }
+    });
+    before.crowded.forEach((box) => {
+      const cs = getComputedStyle(box);
+      if (cs.display.indexOf('flex') >= 0 && cs.flexDirection.indexOf('column') === 0) {
+        touched.push([box, 'justifyContent', box.style.justifyContent]);
+        box.style.justifyContent = 'center';
+      }
+    });
+    // GROW-BOX (2026-05-31): a box whose text overflows its bottom (written-in /
+    // squeezed-flat height) → raise its min-height to contain the content (the
+    // runtime version of grow-box-fit's 拉高框). We grow OPTIMISTICALLY here;
+    // the measure-or-revert guard below is the safety net — if growing pushes
+    // the slide past its edge (no canvas room) or moves the title, the whole
+    // thing reverts (incl. these min-heights). Never shrinks; never touches fonts.
+    const scaleAB = parseFloat(getComputedStyle(slide).getPropertyValue('--fs-scale')) || 1;
+    before.overflowed.forEach(([box, over]) => {
+      const r = box.getBoundingClientRect();
+      touched.push([box, 'minHeight', box.style.minHeight]);
+      box.style.minHeight = Math.ceil(r.height / scaleAB + over + 6) + 'px';
+    });
+    const after = _abMeasure(slide);
+    const titleMoved = titleSnap.some(([el, t, l]) => {
+      const r = el.getBoundingClientRect();
+      return Math.abs(r.top - t) > 1 || Math.abs(r.left - l) > 1;
+    });
+    // Keep if EITHER crowd OR overflow got meaningfully better, AND neither got
+    // worse, AND no new canvas spill, AND the title didn't move (death rule).
+    const crowdBetter = after.severity < before.severity - 0.5;
+    const overflowBetter = after.overflow < before.overflow - 2;
+    const improved = (crowdBetter || overflowBetter) &&
+                     after.severity <= before.severity + 0.5 &&
+                     after.overflow <= before.overflow + 2 &&
+                     after.spill <= Math.max(before.spill, 2) && !titleMoved;
+    if (improved) {
+      slide.setAttribute('data-fs-autobalanced', '');
+    } else {
+      for (const [el, prop, val] of touched) el.style[prop] = val || '';  // incl. title-moved revert
+    }
+  }
+  function maybeBalance(slide) {
+    if (!slide || slide.hasAttribute('data-fs-balanced')) return;
+    const deck = slide.closest('.deck');
+    if (deck && deck.hasAttribute('data-no-autobalance')) return;
+    // content-visibility:auto skips off-screen slides → their content has 0
+    // size. Only tag+balance once a content container is actually laid out;
+    // otherwise leave untagged so the is-current observer retries when visible.
+    const probe = slide.querySelector('.stage, .grid, .flow, .nodes, .toc, .stack, .header, [class*="card"]');
+    if (!probe || probe.getBoundingClientRect().height < 30) return;
+    slide.setAttribute('data-fs-balanced', '');
+    try { balanceSlide(slide); } catch (e) { /* never break the deck over layout */ }
+  }
+
   function init() {
     const deck = document.querySelector('.deck');
     if (!deck) return null;
@@ -3848,6 +4153,7 @@ body {
     // ---- Keyboard nav (present mode) + F = fullscreen (any mode) ----
     document.addEventListener('keydown', (e) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (isTypingTarget(e.target)) return;
       if (e.key === 'f' || e.key === 'F') {
         e.preventDefault(); toggleFullscreen(); nudgeIdle(); return;
       }
@@ -3955,6 +4261,10 @@ body {
     // starts the current slide's video.
     const mediaState = frames.map((f) => f.classList.contains('is-current'));
     frames.forEach((f, i) => syncFrameMedia(f, mediaState[i]));
+    // Initial auto-balance pass: balances the current slide (present mode) and
+    // every laid-out slide (scroll mode). Non-current present-mode slides are
+    // content-visibility-hidden here and get balanced on first enter (below).
+    requestAnimationFrame(() => frames.forEach((f) => maybeBalance(f.querySelector('.slide'))));
     const mediaObserver = new MutationObserver((muts) => {
       for (const m of muts) {
         const i = frames.indexOf(m.target);
@@ -3963,6 +4273,9 @@ body {
         if (now === mediaState[i]) continue;   // class changed but is-current didn't
         mediaState[i] = now;
         syncFrameMedia(m.target, now);
+        // Balance a present-mode slide the first time it becomes visible
+        // (content-visibility makes it measurable only now).
+        if (now) requestAnimationFrame(() => maybeBalance(m.target.querySelector('.slide')));
       }
     });
     frames.forEach((f) => mediaObserver.observe(f, { attributes: true, attributeFilter: ['class'] }));
@@ -4250,6 +4563,13 @@ body {
     } else {
       requestFullscreen();
     }
+  }
+
+  function isTypingTarget(target) {
+    if (!target || !(target instanceof Element)) return false;
+    if (target.isContentEditable) return true;
+    const tag = target.tagName;
+    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
   }
 
   function maybePortraitToast() {

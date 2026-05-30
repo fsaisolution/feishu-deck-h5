@@ -171,7 +171,7 @@ logos in `assets/` root — that folder is reserved for framework
 **Lookup workflow** (every time you author a slide that references client logos):
 
 ```bash
-ls /Users/<user>/.claude/skills/feishu-deck-h5/assets/shared/clientlogo/ | grep -i "<name>"
+ls assets/shared/clientlogo/ | grep -i "<name>"
 ```
 
 If the brand exists → use that file. If it doesn't → ask the user to drop
@@ -271,10 +271,10 @@ plain `background-image` + `border-radius: 50%` renders cleanly.
 
 ```bash
 # Step 1: try named persona first
-ls ~/.claude/skills/feishu-deck-h5/assets/shared/mydigitalemployee/ | grep -i "<name>"
+ls assets/shared/mydigitalemployee/ | grep -i "<name>"
 
 # Step 2: if no named match, fall back to generic library
-ls ~/.claude/skills/feishu-deck-h5/assets/shared/digital_employee_avatars_50/ | head
+ls assets/shared/digital_employee_avatars_50/ | head
 ```
 
 If named persona exists → use `mydigitalemployee/`. If the slide just
@@ -437,4 +437,3 @@ almost always wins. If the source is a 2000×1200 dashboard packed
 with data, just use the screenshot — `<img>` it with `max-width: native`.
 
 ---
-

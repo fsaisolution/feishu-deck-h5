@@ -43,7 +43,7 @@ content if they say "重新设计 / 重画 / 改 layout / 套个新的 pattern".
 
 下面是按需加载的参考文件;遇到对应模式/特性时用 Read 打开对应文件。
 
-所有路径前缀:`~/.claude/skills/feishu-deck-h5/references/`
+所有路径前缀:`<harness-root>/skills/feishu-deck-h5/references/`
 
 - `assets-and-files.md` — 品牌资产/产品icon/persona/phone-mock + 文件树
 - `check-only.md` — CHECK-ONLY 模式:用户给成品 HTML 要审/校验
@@ -189,7 +189,7 @@ keep working because the workspace IS a complete copy.
 **Step P-2.5.** If the script's stdout contains the line
 `WARNING · another clone of this repo lives on disk:`, the user has
 TWO checkouts of `feishu-deck-h5` on the machine (e.g. one in
-`~/Documents/Github/feishu-deck-h5/` and one in the Claude Code
+`~/Documents/Github/feishu-deck-h5/` and one in the agent
 session-mount path). Outputs you create here will NOT appear in the
 other one — same GitHub remote, different filesystem directories.
 
@@ -204,8 +204,8 @@ user and ask which clone they want this run's deck to land in:
 > 在另一份编辑/commit，我建议切到那份再继续。要切吗？"
 
 If the user says "切到 X" / "use the other one", abort this run and
-ask them to re-invoke the skill with Claude Code mounted at the
-other path. If the user says "use this one" / explicitly picks the
+ask them to re-invoke the skill with the chosen path mounted. If the
+user says "use this one" / explicitly picks the
 current root, proceed to Step W-1.
 
 **Step P-3.** Call `mcp__cowork__request_cowork_directory` and ask the
@@ -236,7 +236,7 @@ gate.
 |---|---|---|
 | User cloned the repo + mounted | `~/Projects/feishu-deck-h5/` mounted; SKILL.md visible | OK, proceed |
 | User mounted a parent project folder | `~/Projects/q1-pitch/` mounted; cloned skill in subfolder OR via plugin install | OK, proceed |
-| User mounted a fresh empty folder | Mounted but no skill files yet | Copy skill files into the mount first (`git clone` or copy from `~/.claude/skills/`), then proceed |
+| User mounted a fresh empty folder | Mounted but no skill files yet | Copy skill files into the mount first (`git clone` or copy from `~/.claude/skills/` / `~/.codex/skills/`), then proceed |
 | Harness mounts skill read-only (Mira / sandbox) | `preflight.sh` prints `PREFLIGHT BOOTSTRAPPED` and exit 0 | `cd` into the workspace path it printed, then run all skill commands from there (Step P-2.4) |
 | User has not mounted anything | `User selected a folder: no` in env | Request mount, refuse if declined |
 | Working in `/sessions/*/mnt/outputs/` only | `preflight.sh` returns exit 3 | Treat as no-mount, refuse |

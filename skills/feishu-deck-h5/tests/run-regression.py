@@ -65,7 +65,7 @@ def run_validator(deck: Path) -> dict:
     if not deck.exists():
         raise FileNotFoundError(f'deck not found: {deck}')
     proc = subprocess.run(
-        ['python3', str(VALIDATOR), str(deck), '--visual', '--json'],
+        [sys.executable, str(VALIDATOR), str(deck), '--visual', '--json'],
         capture_output=True, text=True, timeout=420,
     )
     try:

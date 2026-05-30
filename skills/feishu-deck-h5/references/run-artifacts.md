@@ -75,7 +75,7 @@ Hardcoding a personal address would couple the skill to one person.
 ### How the agent surfaces it at end of run
 
 After validator passes and files are written, the agent's delivery
-message (Mode 1 — Claude Code on local) MUST include:
+message (Mode 1 — local agent) MUST include:
 
 > · `runs/<ts>/output/FEEDBACK.md` — 这次 build 的关键决策清单,
 >   见到不对的地方打钩或备注;累 ≥3 条发给维护者整合到下版.
@@ -134,9 +134,10 @@ support was added).
   <session-id>.jsonl`. Single-flag deck filter (`--filter-deck SLUG`),
   session-level scoping (any prompt in a transcript mentioning the
   slug → include all prompts from that transcript).
-- (other agent adapters: TBD — Codex / Mira / Cursor / Aider need
-  sample transcripts before adapters can be written; do NOT speculate-write
-  blind adapters)
+- (other post-hoc transcript adapters: TBD — Codex / Mira / Cursor /
+  Aider need sample transcripts before adapters can be written; do NOT
+  speculate-write blind adapters. This does not block realtime `PROMPTS.md`
+  writing or normal deck generation in those agents.)
 
 Use:
 ```bash
@@ -214,4 +215,3 @@ internal metrics), `package-deliverable.sh --exclude PROMPTS.md` (TBD)
 or just `rm` before zipping. There's no automated PII scrubbing yet.
 
 ---
-

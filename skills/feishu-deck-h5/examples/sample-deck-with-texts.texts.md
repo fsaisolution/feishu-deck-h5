@@ -36,7 +36,6 @@ title_en_05: Rollout and service
 n_06: 06
 title_zh_07: 下一步
 title_en_06: Next steps
-span: 飞书 · 2026 客户提案
 
 ## slide-03 (section) — 03 Section
 wordmark: 飞书
@@ -48,7 +47,6 @@ pill_02: 飞书文档
 pill_03: 飞书多维表格
 pill_04: 飞书知识库
 pill_05: 飞书视频会议
-span: 飞书 · 2026 客户提案
 
 ## slide-04 (content-3up) — 04 Content
 wordmark: 飞书
@@ -65,7 +63,6 @@ num_03: 03
 ctitle_03: 闭环交付\nClosed-loop delivery
 cbody_03: 从需求到上线,流程在 Base 中自动流转,每一步都有责任人和时间戳。
 span_03: BASE · MEETINGS
-span_04: 飞书 · 2026 客户提案
 
 ## slide-05 (content-2col) — 05 Content
 wordmark: 飞书
@@ -75,13 +72,11 @@ li: 看板、甘特、日历、卡片视图,一份数据多种视角。
 li_02: 关联字段把分散的表打成网,数据不再孤立。
 li_03: 触发器 + 自动化,把人手操作变成系统行为。
 li_04: 开放 API,与 ERP、CRM、自研系统双向同步。
-span: 飞书 · 2026 客户提案
 
 ## slide-06 (quote) — 06 Quote
 wordmark: 飞书
 accent_text: 像一个团队
 attrib: 某头部互联网公司 · CIO · 2024
-span: 飞书 · Customer Voice
 
 ## slide-07 (stats) — 07 Stats
 wordmark: 飞书
@@ -103,20 +98,17 @@ unit_04: 秒
 label_04: 关键决策从发起到对齐时长
 source_04: Source · 客户访谈 N=24
 footnote: 数据样本: 12 家中国头部企业, 2024 Q3-Q4 实测, 口径见附录 A.
-span: 飞书 · 2026 客户提案
 
 ## slide-08 (big-stat) — 08 Big Stat
 wordmark: 飞书
 unit: 万人
 h2: 单一组织,统一协同
 p: 飞书的消息、文档、视频会议在 30 万人量级下保持秒级响应,且不依赖私有部署。
-span: 飞书 · 2026 客户提案
 
 ## slide-09 (image-text) — 09 Image
 wordmark: 飞书
 title: 现场决策,\n从未离线
 lede: 门店、产线、出差、远程,飞书让每一处节点都能即时被看到、被对齐。
-span: 飞书 · 2026 客户提案
 
 ## slide-10 (table) — 10 Table
 wordmark: 飞书
@@ -145,7 +137,6 @@ td_17: 开放 API + Webhook
 td_18: 全量开放
 td_19: 受限
 td_20: 受限
-span: 飞书 · 2026 客户提案
 
 ## slide-11 (timeline) — 11 Timeline
 wordmark: 飞书
@@ -162,7 +153,6 @@ desc_03: 分层培训, 关键岗位 100% 接入, 数据搬迁完成。
 when_04: W9-12
 what_04: 数据复盘
 desc_04: 复盘 KPI, 调整流程, 形成长期治理机制。
-span: 飞书 · 2026 客户提案
 
 ## slide-12 (process) — 12 Process
 wordmark: 飞书
@@ -179,7 +169,6 @@ p_03: 负责人在 Base 中流转, 责任人 + 时间戳每一步可追溯。
 stnum_04: 04
 h3_04: 复盘
 p_04: 会后 Meetings 自动生成纪要, 关键指标进入下个周期。
-span: 飞书 · 2026 客户提案
 
 ## slide-13 (end) — 13 End
 wordmark: 飞书

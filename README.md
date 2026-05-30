@@ -4,7 +4,7 @@
 > 浏览器全屏即放映、单文件发 IM、文本编辑器改字、视觉与飞书官方母版逐像素对齐。
 > 而且:**版面质量不是"靠人盯",是一层无头浏览器逐页渲染、程序化卡死的硬门禁。**
 
-🔗 看样品 → [`examples/sample-deck.html`](examples/sample-deck.html)
+🔗 看样品 → [`skills/feishu-deck-h5/examples/sample-deck.html`](skills/feishu-deck-h5/examples/sample-deck.html)
 （双击在浏览器打开,左右键翻页）
 
 ---
@@ -127,21 +127,27 @@ python3 deck-json/render-deck.py runs/<ts>/output/deck.json runs/<ts>/output/ --
 
 ## 看更多例子
 
-- [`examples/sample-deck.html`](examples/sample-deck.html) —— 12 张 slide 涵盖全部基础 layout
-- [`preview-dark.html`](preview-dark.html) —— 设计令牌(颜色 / 字号 / 渐变)+ 组件 gallery
-- [`templates/slide-recipes.html`](templates/slide-recipes.html) —— 每种 layout 的 reference 实现
+- [`skills/feishu-deck-h5/examples/sample-deck.html`](skills/feishu-deck-h5/examples/sample-deck.html) —— 12 张 slide 涵盖全部基础 layout
+- [`skills/feishu-deck-h5/preview-dark.html`](skills/feishu-deck-h5/preview-dark.html) —— 设计令牌(颜色 / 字号 / 渐变)+ 组件 gallery
+- [`skills/feishu-deck-h5/templates/slide-recipes.html`](skills/feishu-deck-h5/templates/slide-recipes.html) —— 每种 layout 的 reference 实现
 
 ---
 
 ## 怎么开始用
 
-**让 Claude 帮你装 + 帮你做**,一句话:
+**让 Claude / Codex 帮你装 + 帮你做**,一句话:
 
 > "帮我安装 feishu-deck-h5 skill:https://github.com/FuQiang/feishu-deck-h5,
 > 装完帮我做一份关于〔你的主题〕的 deck"
 
-Claude 会读 [INSTALL.md](INSTALL.md) 走标准安装流程(plugin marketplace 或 install.sh),
+Claude / Codex 会读 [INSTALL.md](INSTALL.md) 走标准安装流程(plugin marketplace、Codex skills path 或 install.sh),
 然后按 [SKILL.md](skills/feishu-deck-h5/SKILL.md) 的规范、走 DeckJSON 流水线生成 deck。
+
+安装目标:
+
+- Claude Code:用 plugin marketplace,或安装到 `~/.claude/skills/feishu-deck-h5`
+- Codex:用 `HARNESS=codex bash install.sh`,或安装到 `${CODEX_HOME:-~/.codex}/skills/feishu-deck-h5`
+- 其他兼容 harness:用 `HARNESS_DIR=/path/to/root bash install.sh`
 
 ---
 

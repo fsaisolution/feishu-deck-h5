@@ -151,7 +151,7 @@ generates it; the agent emits it directly when authoring a fresh deck.
 >
 > Rules:
 >   • Edit ONLY this file. Visual tweaks → overrides.css.
->     Layout / structure / new slides → re-ask Claude.
+>     Layout / structure / new slides → re-ask the agent.
 >   • Use `\n` to insert a line break (renders as <br>).
 >   • Do NOT rename the slide-NN.field ids — they pair with HTML.
 
@@ -181,7 +181,7 @@ agenda.item-01.en: Context and challenges
    will conflict).
 2. **Visual / spacing / color tweaks → `overrides.css`** linked at the
    end of the deck. Never edit the inline CSS in the deck.
-3. **Layout, new slides, structural changes → re-ask Claude.** That
+3. **Layout, new slides, structural changes → re-ask the agent.** That
    triggers a regeneration; ids must remain stable for slides that
    already existed.
 
@@ -191,7 +191,7 @@ agenda.item-01.en: Context and challenges
 |---|---|
 | `assets/apply-texts.py [<html> <texts.md>] [--dry-run] [--check]` | Apply edits from texts.md back into HTML. With no args, defaults to `index.html` + `texts.md` in the script's own directory (so it works inside the bundled deliverable zip). `--check` exits 1 on drift. |
 | `assets/extract-texts.py <html> [--out texts.md] [--annotate out.html]` | Bootstrap texts.md from a deck. Mode A: deck already annotated — just dump. Mode B: bare deck — auto-add `data-text-id` and emit annotated HTML alongside texts.md. |
-| `assets/package-deliverable.sh <output-dir> [--name foo]` | Bundle the per-run output into `deck-editable.zip` containing `index.html`, `assets/`, `texts.md`, optional `deck.json`, `assets-manifest.yaml`, `apply-texts.py`, `apply.command` (macOS), `apply.bat` (Windows), and a user-facing `README.txt`. The recipient unzips, edits texts.md, double-clicks the launcher — no Claude Code or pip required, just stock Python 3. |
+| `assets/package-deliverable.sh <output-dir> [--name foo]` | Bundle the per-run output into `deck-editable.zip` containing `index.html`, `assets/`, `texts.md`, optional `deck.json`, `assets-manifest.yaml`, `apply-texts.py`, `apply.command` (macOS), `apply.bat` (Windows), and a user-facing `README.txt`. The recipient unzips, edits texts.md, double-clicks the launcher — no authoring agent or pip required, just stock Python 3. |
 
 **Retrofit limitation**: `extract-texts.py` Mode B captures pure text
 leaves only. Mixed-content elements (text + inline tags) are skipped —
@@ -216,4 +216,3 @@ Decks with no `data-text-id` at all are flagged with a single warning
 so legacy / external decks still pass through.
 
 ---
-

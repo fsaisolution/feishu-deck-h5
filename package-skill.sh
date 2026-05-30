@@ -3,7 +3,7 @@
 #
 # Produces feishu-deck-h5-<YYYYMMDD>-<shortsha>.zip in the repo root.
 # Recipient unzips → moves the inner feishu-deck-h5/ folder into their
-# harness's skills directory (~/.claude/skills/, ~/.openclaw/skills/, …).
+# harness's skills directory (~/.claude/skills/, ~/.codex/skills/, …).
 #
 # Version naming:  date stamp + git short SHA (auto, fully traceable).
 # Dirty trees are flagged with `-dirty` so you don't ship un-committed work
@@ -67,8 +67,17 @@ your harness's skills folder:
 | Harness         | Target path                                |
 | --------------- | ------------------------------------------ |
 | Claude Code     | \`~/.claude/skills/$SKILL_NAME/\`         |
+| Codex           | \`~/.codex/skills/$SKILL_NAME/\`          |
 | OpenClaw        | \`~/.openclaw/skills/$SKILL_NAME/\`       |
 | Other           | \`<harness-root>/skills/$SKILL_NAME/\`     |
+
+Quick way (Codex on macOS / Linux):
+
+\`\`\`bash
+unzip $ZIP_NAME
+mkdir -p ~/.codex/skills
+mv $SKILL_NAME ~/.codex/skills/
+\`\`\`
 
 Quick way (Claude Code on macOS / Linux):
 
@@ -81,7 +90,8 @@ mv $SKILL_NAME ~/.claude/skills/
 ## Verify
 
 \`\`\`bash
-bash ~/.claude/skills/$SKILL_NAME/assets/preflight.sh
+bash ~/.codex/skills/$SKILL_NAME/assets/preflight.sh
+# or: bash ~/.claude/skills/$SKILL_NAME/assets/preflight.sh
 \`\`\`
 
 Expect \`PREFLIGHT OK\`. Done — invoke the skill from any chat that has
@@ -93,8 +103,8 @@ a writable mounted folder.
   maintainer for a fresh zip, or use the git-based install in the
   project's \`INSTALL.md\` (requires GitHub access).
 - \`runs/\` (per-invocation outputs) is intentionally excluded from this
-  zip. It will be created at \`~/.claude/skills/$SKILL_NAME/runs/\` (or
-  at the repo root when checked out via git) on first use.
+  zip. It will be created under the installed skill directory (or at the
+  repo root when checked out via git) on first use.
 - Core deck generation is self-contained: no \`pip install\` or
   \`npm install\` is required beyond stock Python 3.11+ and a modern
   browser. Developer checks, \`--gate ingest\`, and strict visual audits

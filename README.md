@@ -81,13 +81,19 @@
 
 ## 怎么开始用
 
-**让 Claude 帮你装 + 帮你做**，一句话：
+**让 Claude / Codex 帮你装 + 帮你做**，一句话：
 
-> "帮我安装 feishu-deck-h5 skill：https://github.com/FuQiang/feishu-deck-h5，
+> "帮我安装 feishu-deck-h5 skill：https://github.com/fsaisolution/feishu-deck-h5，
 > 装完帮我做一份关于〔你的主题〕的 deck"
 
-Claude 会读 [INSTALL.md](INSTALL.md) 走标准安装流程（plugin marketplace 或 install.sh），
+Claude / Codex 会读 [INSTALL.md](INSTALL.md) 走标准安装流程（plugin marketplace、Codex skills path 或 install.sh），
 然后按 [SKILL.md](skills/feishu-deck-h5/SKILL.md) 的规范生成 deck。
+
+安装目标：
+
+- Claude Code：用 plugin marketplace，或安装到 `~/.claude/skills/feishu-deck-h5`
+- Codex：用 `HARNESS=codex bash install.sh`，或安装到 `${CODEX_HOME:-~/.codex}/skills/feishu-deck-h5`
+- 其他兼容 harness：用 `HARNESS_DIR=/path/to/root bash install.sh`
 
 ---
 

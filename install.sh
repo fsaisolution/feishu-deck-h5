@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 # feishu-deck-h5 · install script
 #
-# Installs this skill into Claude Code (or any compatible harness that follows
-# the ~/.claude/skills/ convention) by:
+# Installs this skill into Claude Code, Codex, or any compatible harness by:
 #   1. Cloning to $INSTALL_DIR (default: ~/Projects/feishu-deck-h5)
-#   2. Symlinking skills/feishu-deck-h5 into $CLAUDE_DIR/skills/feishu-deck-h5
+#   2. Symlinking skills/feishu-deck-h5 into $HARNESS_DIR/skills/feishu-deck-h5
 #   3. Running preflight to verify
 #
 # Usage:
@@ -13,20 +12,53 @@
 #
 # Environment variables:
 #   INSTALL_DIR   where to keep the working clone (default: ~/Projects/feishu-deck-h5)
-#   CLAUDE_DIR    skill registration root (default: ~/.claude — use ~/.openclaw etc. for other harnesses)
-#   REPO_URL      override the git remote (default: https://github.com/fuqiang/feishu-deck-h5.git)
+#   HARNESS       claude | codex | openclaw (default: claude)
+#   HARNESS_DIR   skill registration root (default depends on HARNESS)
+#   CLAUDE_DIR    backward-compatible alias for HARNESS_DIR
+#   REPO_URL      override the git remote (default: https://github.com/fsaisolution/feishu-deck-h5.git)
 
 set -e
 
-REPO_URL="${REPO_URL:-https://github.com/fuqiang/feishu-deck-h5.git}"
+REPO_URL="${REPO_URL:-https://github.com/fsaisolution/feishu-deck-h5.git}"
 INSTALL_DIR="${INSTALL_DIR:-$HOME/Projects/feishu-deck-h5}"
-CLAUDE_DIR="${CLAUDE_DIR:-$HOME/.claude}"
-SKILLS_DIR="$CLAUDE_DIR/skills"
+HARNESS="${HARNESS:-claude}"
+
+REPO_WEB_URL="$REPO_URL"
+case "$REPO_WEB_URL" in
+  git@github.com:*)
+    REPO_WEB_URL="https://github.com/${REPO_WEB_URL#git@github.com:}"
+    ;;
+  ssh://git@github.com/*)
+    REPO_WEB_URL="https://github.com/${REPO_WEB_URL#ssh://git@github.com/}"
+    ;;
+esac
+REPO_WEB_URL="${REPO_WEB_URL%.git}"
+
+case "$HARNESS" in
+  claude)
+    DEFAULT_HARNESS_DIR="$HOME/.claude"
+    ;;
+  codex)
+    DEFAULT_HARNESS_DIR="${CODEX_HOME:-$HOME/.codex}"
+    ;;
+  openclaw)
+    DEFAULT_HARNESS_DIR="$HOME/.openclaw"
+    ;;
+  *)
+    echo "ERROR — unknown HARNESS '$HARNESS'. Use claude, codex, openclaw, or set HARNESS_DIR directly." >&2
+    exit 64
+    ;;
+esac
+
+HARNESS_DIR="${HARNESS_DIR:-${CLAUDE_DIR:-$DEFAULT_HARNESS_DIR}}"
+SKILLS_DIR="$HARNESS_DIR/skills"
 LINK_PATH="$SKILLS_DIR/feishu-deck-h5"
 
 echo "==> feishu-deck-h5 install"
 echo "    repo:    $REPO_URL"
 echo "    target:  $INSTALL_DIR"
+echo "    harness: $HARNESS"
+echo "    root:    $HARNESS_DIR"
 echo "    symlink: $LINK_PATH"
 echo
 
@@ -54,13 +86,13 @@ ERROR — your SSH key works, but you don't have access to this SSH remote.
 Send this message to the repo owner on Lark/Feishu:
 
   ──────────────────────────────────────────────────────────────
-  你好 FuQiang，想用一下 feishu-deck-h5 这个 skill，
+  你好，想用一下 feishu-deck-h5 这个 skill，
   请把我加为仓库 collaborator：
 
   · GitHub 用户名: ${GH_USER:-<你的 GitHub username, 在 https://github.com 登录后右上角>}
-  · 仓库: https://github.com/FuQiang/feishu-deck-h5
-  · 添加入口（FuQiang 这边点）:
-    https://github.com/FuQiang/feishu-deck-h5/settings/access
+  · 仓库: $REPO_WEB_URL
+  · 添加入口（仓库管理员这边点）:
+    $REPO_WEB_URL/settings/access
   ──────────────────────────────────────────────────────────────
 
 收到 GitHub 邀请邮件后点 "Accept invitation"，然后重新运行本脚本。
@@ -90,7 +122,7 @@ else
   git clone "$REPO_URL" "$INSTALL_DIR"
 fi
 
-# 2. symlink into $CLAUDE_DIR/skills/
+# 2. symlink into $HARNESS_DIR/skills/
 mkdir -p "$SKILLS_DIR"
 if [ -L "$LINK_PATH" ] || [ -e "$LINK_PATH" ]; then
   echo "==> removing existing $LINK_PATH..."
@@ -104,7 +136,7 @@ echo
 echo "==> running preflight..."
 if bash "$LINK_PATH/assets/preflight.sh"; then
   echo
-  echo "==> DONE. Restart your Claude Code / harness session to pick up the new skill."
+  echo "==> DONE. Restart your Claude Code / Codex / harness session to pick up the new skill."
 else
   echo
   echo "WARN — preflight failed. The skill is installed but the current directory"

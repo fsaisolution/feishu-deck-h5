@@ -18,6 +18,10 @@ Keep day-to-day work on feature branches:
 git switch -c codex/<topic>
 ```
 
+The `codex/` prefix only marks the working branch owner/tooling. It does not
+mean the skill is Codex-only; shared changes should keep Claude, Codex, and
+other compatible harnesses working.
+
 Periodically pull upstream into the internal fork:
 
 ```bash
@@ -58,4 +62,5 @@ The first internal branch should focus on production readiness only:
 - make the bundled sample pass strict visual validation
 - document Python and optional validation dependencies
 - support HTTPS clone by default
+- make Codex a first-class install target without breaking Claude installs
 - keep public README links accurate from the repo root

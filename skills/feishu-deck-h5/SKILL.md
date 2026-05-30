@@ -349,7 +349,7 @@ keep working because the workspace IS a complete copy.
 **Step P-2.5.** If the script's stdout contains the line
 `WARNING · another clone of this repo lives on disk:`, the user has
 TWO checkouts of `feishu-deck-h5` on the machine (e.g. one in
-`~/Documents/Github/feishu-deck-h5/` and one in the Claude Code
+`~/Documents/Github/feishu-deck-h5/` and one in the agent
 session-mount path). Outputs you create here will NOT appear in the
 other one — same GitHub remote, different filesystem directories.
 
@@ -364,8 +364,8 @@ user and ask which clone they want this run's deck to land in:
 > 在另一份编辑/commit，我建议切到那份再继续。要切吗？"
 
 If the user says "切到 X" / "use the other one", abort this run and
-ask them to re-invoke the skill with Claude Code mounted at the
-other path. If the user says "use this one" / explicitly picks the
+ask them to re-invoke the skill with the chosen path mounted. If the
+user says "use this one" / explicitly picks the
 current root, proceed to Step W-1.
 
 **Step P-3.** Call `mcp__cowork__request_cowork_directory` and ask the
@@ -396,7 +396,7 @@ gate.
 |---|---|---|
 | User cloned the repo + mounted | `~/Projects/feishu-deck-h5/` mounted; SKILL.md visible | OK, proceed |
 | User mounted a parent project folder | `~/Projects/q1-pitch/` mounted; cloned skill in subfolder OR via plugin install | OK, proceed |
-| User mounted a fresh empty folder | Mounted but no skill files yet | Copy skill files into the mount first (`git clone` or copy from `~/.claude/skills/`), then proceed |
+| User mounted a fresh empty folder | Mounted but no skill files yet | Copy skill files into the mount first (`git clone` or copy from `~/.claude/skills/` / `~/.codex/skills/`), then proceed |
 | Harness mounts skill read-only (Mira / sandbox) | `preflight.sh` prints `PREFLIGHT BOOTSTRAPPED` and exit 0 | `cd` into the workspace path it printed, then run all skill commands from there (Step P-2.4) |
 | User has not mounted anything | `User selected a folder: no` in env | Request mount, refuse if declined |
 | Working in `/sessions/*/mnt/outputs/` only | `preflight.sh` returns exit 3 | Treat as no-mount, refuse |
@@ -1434,7 +1434,7 @@ generates it; the agent emits it directly when authoring a fresh deck.
 >
 > Rules:
 >   • Edit ONLY this file. Visual tweaks → overrides.css.
->     Layout / structure / new slides → re-ask Claude.
+>     Layout / structure / new slides → re-ask the agent.
 >   • Use `\n` to insert a line break (renders as <br>).
 >   • Do NOT rename the slide-NN.field ids — they pair with HTML.
 
@@ -1464,7 +1464,7 @@ agenda.item-01.en: Context and challenges
    will conflict).
 2. **Visual / spacing / color tweaks → `overrides.css`** linked at the
    end of the deck. Never edit the inline CSS in the deck.
-3. **Layout, new slides, structural changes → re-ask Claude.** That
+3. **Layout, new slides, structural changes → re-ask the agent.** That
    triggers a regeneration; ids must remain stable for slides that
    already existed.
 
@@ -1474,7 +1474,7 @@ agenda.item-01.en: Context and challenges
 |---|---|
 | `assets/apply-texts.py [<html> <texts.md>] [--dry-run] [--check]` | Apply edits from texts.md back into HTML. With no args, defaults to `index.html` + `texts.md` in the script's own directory (so it works inside the bundled deliverable zip). `--check` exits 1 on drift. |
 | `assets/extract-texts.py <html> [--out texts.md] [--annotate out.html]` | Bootstrap texts.md from a deck. Mode A: deck already annotated — just dump. Mode B: bare deck — auto-add `data-text-id` and emit annotated HTML alongside texts.md. |
-| `assets/package-deliverable.sh <output-dir> [--name foo]` | Bundle the per-run output into `deck-editable.zip` containing `index.html`, `texts.md`, `apply-texts.py`, `apply.command` (macOS), `apply.bat` (Windows), and a user-facing `README.txt`. The recipient unzips, edits texts.md, double-clicks the launcher — no Claude Code or pip required, just stock Python 3. |
+| `assets/package-deliverable.sh <output-dir> [--name foo]` | Bundle the per-run output into `deck-editable.zip` containing `index.html`, `texts.md`, `apply-texts.py`, `apply.command` (macOS), `apply.bat` (Windows), and a user-facing `README.txt`. The recipient unzips, edits texts.md, double-clicks the launcher — no authoring agent or pip required, just stock Python 3. |
 
 **Retrofit limitation**: `extract-texts.py` Mode B captures pure text
 leaves only. Mixed-content elements (text + inline tags) are skipped —
@@ -1512,7 +1512,7 @@ right delivery mode and call it out explicitly when handing off.
 by file path.**
 
 - **Interactive / chat / dialog** (the user sent a message and is
-  waiting for your reply — Claude Code, Lark bot, web chat, any
+  waiting for your reply — Claude Code, Codex, Lark bot, web chat, any
   agent platform with a conversation UI): **MUST** end the reply by
   pointing at — or attaching — the new artifact under
   `runs/<ts>/output/`. Every iteration. "已修复" alone is a bug; the
@@ -1539,7 +1539,7 @@ verify the artifact form. Pick exactly **one** of three valid shapes:
 | Shape | When | What goes back |
 |---|---|---|
 | **A · inline single-file HTML** *(default for "show me / 给客户看 / IM 转发 / 链接预览")* | The user just wants to OPEN and SEE the deck. 90% of cases. | `bash build.sh --inline` → ship `examples/sample-deck-inline.html` (or its renamed copy under `runs/<ts>/output/`). Single self-contained file, base64-inlined CSS/JS/images, ~360 KB. Double-click anywhere, works offline. |
-| **B · zipped output folder** *(when the user needs to edit text)* | The user (or their downstream customer / sales / 大客户经理) needs to change copy without Claude in the loop. | `bash assets/package-deliverable.sh runs/<ts>/output/` → ship the resulting `deck-editable.zip`. Includes `index.html` + assets + `texts.md` + `apply-texts.py` + `apply.command`/`apply.bat` launchers. Recipient unzips, edits `texts.md`, double-clicks the launcher to regenerate. |
+| **B · zipped output folder** *(when the user needs to edit text)* | The user (or their downstream customer / sales / 大客户经理) needs to change copy without the agent in the loop. | `bash assets/package-deliverable.sh runs/<ts>/output/` → ship the resulting `deck-editable.zip`. Includes `index.html` + assets + `texts.md` + `apply-texts.py` + `apply.command`/`apply.bat` launchers. Recipient unzips, edits `texts.md`, double-clicks the launcher to regenerate. |
 | **C · hosted URL** *(when the user already deploys to Pages / a CDN)* | Deck lives at a stable web URL. | Ship the URL string. No file attachment. |
 
 **Banned form · single linked HTML**: never hand back just one
@@ -1715,7 +1715,7 @@ alongside `index.html` automatically. Pass it whenever you're
 delivering — the working `index.html` stays in place for further
 edits, and the named copy goes out to the recipient.
 
-### Mode 1 · Claude Code on the user's local machine
+### Mode 1 · Claude Code / Codex on the user's local machine
 
 Default. The user has filesystem access to `runs/<timestamp>/output/`
 already. Just tell them the path:
@@ -1762,7 +1762,7 @@ Hand the zip to the harness for delivery. Typical bot flows:
   handles uploading or attaching it to the response.
 - **Slack / email / etc.**: same — attach the zip.
 
-The user does not need Claude Code, OpenClaw, or pip. Only stock
+The user does not need the original authoring agent, OpenClaw, or pip. Only stock
 `python3` (default on macOS, one-time install on Windows).
 
 ### Mode 3 · View-only delivery (when editability isn't needed)
@@ -2476,7 +2476,7 @@ Hardcoding a personal address would couple the skill to one person.
 ### How the agent surfaces it at end of run
 
 After validator passes and files are written, the agent's delivery
-message (Mode 1 — Claude Code on local) MUST include:
+message (Mode 1 — local agent) MUST include:
 
 > · `runs/<ts>/output/FEEDBACK.md` — 这次 build 的关键决策清单,
 >   见到不对的地方打钩或备注;累 ≥3 条发给维护者整合到下版.
@@ -2534,9 +2534,10 @@ support was added).
   <session-id>.jsonl`. Single-flag deck filter (`--filter-deck SLUG`),
   session-level scoping (any prompt in a transcript mentioning the
   slug → include all prompts from that transcript).
-- (other agent adapters: TBD — Codex / Mira / Cursor / Aider need
-  sample transcripts before adapters can be written; do NOT speculate-write
-  blind adapters)
+- (other post-hoc transcript adapters: TBD — Codex / Mira / Cursor /
+  Aider need sample transcripts before adapters can be written; do NOT
+  speculate-write blind adapters. This does not block realtime `PROMPTS.md`
+  writing or normal deck generation in those agents.)
 
 Use:
 ```bash
@@ -2815,7 +2816,7 @@ logos in `assets/` root — that folder is reserved for framework
 **Lookup workflow** (every time you author a slide that references client logos):
 
 ```bash
-ls /Users/<user>/.claude/skills/feishu-deck-h5/assets/shared/clientlogo/ | grep -i "<name>"
+ls assets/shared/clientlogo/ | grep -i "<name>"
 ```
 
 If the brand exists → use that file. If it doesn't → ask the user to drop
@@ -2915,10 +2916,10 @@ plain `background-image` + `border-radius: 50%` renders cleanly.
 
 ```bash
 # Step 1: try named persona first
-ls ~/.claude/skills/feishu-deck-h5/assets/shared/mydigitalemployee/ | grep -i "<name>"
+ls assets/shared/mydigitalemployee/ | grep -i "<name>"
 
 # Step 2: if no named match, fall back to generic library
-ls ~/.claude/skills/feishu-deck-h5/assets/shared/digital_employee_avatars_50/ | head
+ls assets/shared/digital_employee_avatars_50/ | head
 ```
 
 If named persona exists → use `mydigitalemployee/`. If the slide just

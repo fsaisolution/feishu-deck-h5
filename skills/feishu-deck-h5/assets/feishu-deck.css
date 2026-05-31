@@ -617,23 +617,23 @@ body {
    LAYOUT 01 — Cover (封面) — matches master slideLayout1
    - Background: image2.jpg (white flower on dark, occupies right ~50%)
    - Logo top-LEFT at (120, 113) size 235×74 — handled by .wordmark cover override
-   - Title at left: 124, top: 285, width: 884 (left half), font 100px / 700
+   - Title at left: 124, top: 285, width: 1120 (safe long-title band), font 88px / 700
    - Subtitle below at top: 551, same font family, smaller
-   - Author / company block at bottom-left at top: 803
+   - Author / company block at bottom-left at top: 835
    ============================================================================ */
 .slide[data-layout="cover"] {
   background: #000 var(--fs-asset-cover-bg) center/cover no-repeat;
 }
 .slide[data-layout="cover"] .stage {
   position: absolute; top: 285px; left: 124px;
-  width: 980px;                         /* left half — widened from master 884 because
-                                           典型 9-字中文标题 @ 100px 会在 884px 内溢出
+  width: 1120px;                        /* left half — widened from master 884 because
+                                           long customer-facing titles wrap hard in 884px
                                            造成 4-5 行 auto-wrap. Dark gradient overlay
-                                           extends to x≈1152, so 980 still preserves
+                                           extends to x≈1152, so this still preserves
                                            flower visibility on the right. */
 }
 .slide[data-layout="cover"] h1.title {
-  font: 700 100px/1.18 var(--fs-font-cjk);  /* master: 50pt → 100px on 1920 canvas */
+  font: 700 88px/1.12 var(--fs-font-cjk);   /* long customer-facing titles need room to avoid author overlap */
   letter-spacing: -0.005em;
   color: #fff;
   margin: 0;
@@ -650,10 +650,9 @@ body {
 .slide[data-layout="cover"] .author {
   /* allow:white-opacity — author block is master-spec; 0.85 keeps the
      name+date a half-step quieter than the 100px title without going gray.
-     2026-05-06 · top: 803 → 720 — author block sits closer to a 2-line title.
-     Master spec said 803 (bottom-left); user feedback elevated this since the
-     huge gap reads as "two unrelated stacks" rather than "title + signature". */
-  position: absolute; left: 124px; top: 720px;
+     2026-05-31 · top: 720 → 835 — leave enough vertical safety for long cover
+     titles and optional subtitles so the signature never collides with them. */
+  position: absolute; left: 124px; top: 835px;
   font: 600 30px/1.45 var(--fs-font-cjk);
   color: rgba(255,255,255,0.85);
   letter-spacing: 0.02em;
